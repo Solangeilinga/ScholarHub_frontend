@@ -1,0 +1,218 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import '../../features/scholarships/models/scholarship_model.dart';
+import '../../features/scholarships/bloc/scholarship_bloc.dart';
+import '../../core/theme/app_theme.dart';
+
+class ScholarshipCard extends StatelessWidget {
+  final Scholarship scholarship;
+  const ScholarshipCard({super.key, required this.scholarship});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push('/scholarships/${scholarship.id}'),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 4),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.border, width: 1.5),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 48, height: 48,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.school_rounded, color: AppTheme.primary),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(scholarship.provider,
+                          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                      Text(
+                        scholarship.title,
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                _BookmarkButton(scholarship: scholarship),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Footer — type + deadline + montant
+            Row(
+              children: [
+                // Type badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    scholarship.typeLabel,
+                    style: const TextStyle(
+                      color: AppTheme.primary, fontSize: 11, fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+
+                // Deadline
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 13,
+                  color: scholarship.isExpiringSoon ? AppTheme.accent : AppTheme.textSecondary,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    DateFormat('dd MMM yyyy', 'fr_FR').format(scholarship.deadline),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: scholarship.isExpiringSoon ? AppTheme.accent : AppTheme.textSecondary,
+                      fontWeight: scholarship.isExpiringSoon ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+                ),
+
+                // Montant
+                if (scholarship.amount != null)
+                  Text(
+                    scholarship.amountFormatted,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700, color: AppTheme.primary, fontSize: 13,
+                    ),
+                  ),
+              ],
+            ),
+
+            // Badge expire bientôt
+            if (scholarship.isExpiringSoon) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppTheme.accent.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  '⏰ Expire dans ${scholarship.daysLeft} jour(s) !',
+                  style: const TextStyle(
+                    color: AppTheme.accent, fontSize: 11, fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BookmarkButton extends StatefulWidget {
+  final Scholarship scholarship;
+  const _BookmarkButton({required this.scholarship});
+
+  @override
+  State<_BookmarkButton> createState() => _BookmarkButtonState();
+}
+
+class _BookmarkButtonState extends State<_BookmarkButton>
+    with SingleTickerProviderStateMixin {
+  late bool _isSaved;
+  late AnimationController _controller;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _isSaved = widget.scholarship.isSaved;
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _scale = Tween<double>(begin: 1.0, end: 1.4).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    HapticFeedback.lightImpact();
+    setState(() => _isSaved = !_isSaved);
+    _controller.forward(from: 0);
+    context.read<ScholarshipBloc>().add(
+      ToggleSaveEvent(id: widget.scholarship.id, isSaved: !_isSaved),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<ScholarshipBloc, ScholarshipState>(
+      listenWhen: (_, curr) =>
+          curr is ScholarshipSavedToggledState &&
+          curr.scholarshipId == widget.scholarship.id,
+      listener: (context, state) {
+        if (state is ScholarshipSavedToggledState) {
+          setState(() => _isSaved = state.isSaved);
+        }
+      },
+      child: GestureDetector(
+        onTap: _toggle,
+        child: AnimatedBuilder(
+          animation: _scale,
+          builder: (_, child) => Transform.scale(scale: _scale.value, child: child),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: _isSaved ? AppTheme.primary.withValues(alpha: 0.1) : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (child, anim) => ScaleTransition(
+                scale: anim,
+                child: FadeTransition(opacity: anim, child: child),
+              ),
+              child: Icon(
+                _isSaved ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
+                key: ValueKey(_isSaved),
+                color: _isSaved ? AppTheme.primary : AppTheme.textSecondary,
+                size: 22,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

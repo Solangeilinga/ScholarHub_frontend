@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "331098715879",
+    "project_id": "scholarhub-85477",
+    "storage_bucket": "scholarhub-85477.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:331098715879:android:738971d1d7aa9e1acb9442",
+        "android_client_info": {
+          "package_name": "com.android.application"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUDzS1Alp2Ye5J0BSIZeiASALvVodLL5A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
