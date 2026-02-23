@@ -37,12 +37,6 @@ class FirebaseService {
           importance: Importance.high,
         ));
 
-    // Récupérer et envoyer le token au backend
-    final token = await _messaging.getToken();
-    if (token != null) {
-      await apiClient.updateFcmToken(token);
-    }
-
     // Écouter les refresh de token
     _messaging.onTokenRefresh.listen((newToken) {
       apiClient.updateFcmToken(newToken);
@@ -55,6 +49,31 @@ class FirebaseService {
 
     // Background handler
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  }
+
+  // ← Appelé après login/register/check — envoie le token FCM au backend
+  static Future<void> onLogin(ApiClient apiClient) async {
+    try {
+      final settings = await _messaging.getNotificationSettings();
+      if (settings.authorizationStatus != AuthorizationStatus.authorized) return;
+
+      final token = await _messaging.getToken();
+      if (token != null) {
+        await apiClient.updateFcmToken(token);
+      }
+    } catch (e) {
+      // Silencieux — ne pas bloquer le login
+    }
+  }
+
+  // ← Appelé avant logout — supprime le token FCM du backend
+  static Future<void> onLogout(ApiClient apiClient) async {
+    try {
+      await _messaging.deleteToken();
+      await apiClient.updateFcmToken(null);
+    } catch (e) {
+      // Silencieux — ne pas bloquer le logout
+    }
   }
 
   static Future<void> _showLocalNotification(RemoteMessage message) async {

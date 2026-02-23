@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/services/firebase_service.dart';
 
 // Events
 abstract class AuthEvent extends Equatable {
@@ -58,6 +59,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (token == null) return emit(AuthUnauthenticatedState());
       final response = await apiClient.getMe();
       emit(AuthAuthenticatedState(user: response.data['user']));
+      // Envoyer le token FCM si déjà connecté
+      FirebaseService.onLogin(apiClient);
     } catch (_) {
       await apiClient.deleteToken();
       emit(AuthUnauthenticatedState());
@@ -69,6 +72,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final response = await apiClient.login({'email': event.email, 'password': event.password});
       await apiClient.saveToken(response.data['token']);
+      // Envoyer le token FCM au backend après login
+      await FirebaseService.onLogin(apiClient);
       emit(AuthAuthenticatedState(user: response.data['user']));
     } catch (e) {
       emit(AuthErrorState(message: _parseError(e)));
@@ -85,6 +90,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (event.country != null) 'country': event.country,
       });
       await apiClient.saveToken(response.data['token']);
+      // Envoyer le token FCM au backend après inscription
+      await FirebaseService.onLogin(apiClient);
       emit(AuthAuthenticatedState(user: response.data['user']));
     } catch (e) {
       emit(AuthErrorState(message: _parseError(e)));
@@ -92,32 +99,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onLogout(AuthLogoutEvent event, Emitter<AuthState> emit) async {
+    // Supprimer le token FCM du backend avant déconnexion
+    await FirebaseService.onLogout(apiClient);
     await apiClient.deleteToken();
     emit(AuthUnauthenticatedState());
   }
 
   String _parseError(dynamic e) {
-  try {
-    if (e is DioException) {
-      // Pas de connexion internet ou serveur inaccessible
-      if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout ||
-          e.type == DioExceptionType.connectionError) {
-        return 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.';
+    try {
+      if (e is DioException) {
+        if (e.type == DioExceptionType.connectionTimeout ||
+            e.type == DioExceptionType.receiveTimeout ||
+            e.type == DioExceptionType.connectionError) {
+          return 'Impossible de se connecter au serveur. Vérifiez votre connexion internet.';
+        }
+        final data = e.response?.data;
+        if (data == null) return 'Erreur de connexion au serveur';
+        if (data['error'] != null) return data['error'];
+        if (data['message'] != null) return data['message'];
+        if (data['errors'] != null && data['errors'] is List) {
+          final errors = data['errors'] as List;
+          return errors.map((e) => e['msg']).join('\n');
+        }
       }
-
-      final data = e.response?.data;
-      if (data == null) return 'Erreur de connexion au serveur';
-      if (data['error'] != null) return data['error'];
-      if (data['message'] != null) return data['message'];
-      if (data['errors'] != null && data['errors'] is List) {
-        final errors = data['errors'] as List;
-        return errors.map((e) => e['msg']).join('\n');
-      }
+      return 'Une erreur est survenue';
+    } catch (_) {
+      return 'Une erreur est survenue';
     }
-    return 'Une erreur est survenue';
-  } catch (_) {
-    return 'Une erreur est survenue';
   }
-}
 }

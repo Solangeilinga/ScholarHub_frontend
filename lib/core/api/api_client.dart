@@ -112,12 +112,9 @@ class ApiClient {
   Future<Response> getApplications() => _dio.get('/users/applications');
   Future<Response> getAdminUsers() => _dio.get('/admin/users');
 
-  // FCM Token
-  Future<void> updateFcmToken(String token) async {
-    try {
-      await _dio.patch('/auth/fcm-token', data: {'fcmToken': token});
-    } catch (_) {}
-  }
+  // FCM Token ← méthode propre
+  Future<void> updateFcmToken(String? token) =>
+      _dio.patch('/users/fcm-token', data: {'fcmToken': token});
 
   // Notifications
   Future<Response> getNotifications() => _dio.get('/notifications');
