@@ -18,6 +18,34 @@ class _NotificationScreenState extends State<NotificationScreen> {
     context.read<NotificationBloc>().add(LoadNotificationsEvent());
   }
 
+  void _showDeleteConfirmation(BuildContext context, String id) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Supprimer la notification ?'),
+        content: const Text('Cette action est irréversible.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.read<NotificationBloc>().add(DeleteNotificationEvent(id));
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.accent,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Supprimer'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,10 +54,47 @@ class _NotificationScreenState extends State<NotificationScreen> {
         actions: [
           BlocBuilder<NotificationBloc, NotificationState>(
             builder: (context, state) {
-              if (state is NotificationsLoadedState && state.unreadCount > 0) {
-                return TextButton(
-                  onPressed: () => context.read<NotificationBloc>().add(MarkAllReadEvent()),
-                  child: const Text('Tout lire'),
+              if (state is NotificationsLoadedState) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (state.unreadCount > 0)
+                      TextButton(
+                        onPressed: () => context.read<NotificationBloc>().add(MarkAllReadEvent()),
+                        child: const Text('Tout lire'),
+                      ),
+                    if (state.notifications.isNotEmpty)
+                      IconButton(
+                        icon: const Icon(Icons.delete_sweep_rounded),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              title: const Text('Tout supprimer ?'),
+                              content: const Text('Voulez-vous supprimer toutes vos notifications ?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  child: const Text('Annuler'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pop(ctx);
+                                    context.read<NotificationBloc>().add(DeleteAllNotificationsEvent());
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.accent,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text('Tout supprimer'),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                  ],
                 );
               }
               return const SizedBox.shrink();
@@ -60,9 +125,51 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 itemBuilder: (_, i) {
                   final notif = state.notifications[i];
                   final isRead = notif['isRead'] as bool;
+                  final isDeleting = state.deletingIds?.contains(notif['id']) ?? false;
+
+                  // Animation de disparition pendant la suppression
+                  if (isDeleting) {
+                    return const SizedBox.shrink();
+                  }
+
                   return Dismissible(
                     key: Key(notif['id']),
-                    onDismissed: (_) => context.read<NotificationBloc>().add(MarkReadEvent(notif['id'])),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 20),
+                      decoration: BoxDecoration(
+                        color: AppTheme.accent,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.delete_rounded, color: Colors.white, size: 28),
+                    ),
+                    confirmDismiss: (direction) async {
+                      return await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          title: const Text('Supprimer ?'),
+                          content: const Text('Voulez-vous supprimer cette notification ?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: const Text('Annuler'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.accent,
+                              ),
+                              child: const Text('Supprimer'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    onDismissed: (_) {
+                      context.read<NotificationBloc>().add(DeleteNotificationEvent(notif['id']));
+                    },
                     child: Container(
                       decoration: BoxDecoration(
                         color: isRead ? Colors.transparent : AppTheme.primary.withValues(alpha: 0.05),
@@ -93,9 +200,24 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             ),
                           ],
                         ),
-                        trailing: !isRead
-                            ? Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppTheme.primary, shape: BoxShape.circle))
-                            : null,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (!isRead)
+                              Container(
+                                width: 8, 
+                                height: 8, 
+                                decoration: const BoxDecoration(
+                                  color: AppTheme.primary, 
+                                  shape: BoxShape.circle
+                                ),
+                              ),
+                            IconButton(
+                              icon: const Icon(Icons.close_rounded, size: 18, color: AppTheme.textSecondary),
+                              onPressed: () => _showDeleteConfirmation(context, notif['id']),
+                            ),
+                          ],
+                        ),
                         onTap: () {
                           if (!isRead) {
                             context.read<NotificationBloc>().add(MarkReadEvent(notif['id']));
@@ -133,5 +255,3 @@ class _NotificationScreenState extends State<NotificationScreen> {
     }
   }
 }
-
-

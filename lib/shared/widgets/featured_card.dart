@@ -57,7 +57,7 @@ class FeaturedCard extends StatelessWidget {
             ),
             const SizedBox(height: 14),
 
-            // Provider
+            // Provider avec logo (CORRIGÉ - identique à ScholarshipCard)
             Row(
               children: [
                 Container(
@@ -66,8 +66,16 @@ class FeaturedCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppTheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
+                    image: scholarship.providerLogo != null
+                        ? DecorationImage(
+                            image: NetworkImage(scholarship.providerLogo!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
                   ),
-                  child: const Icon(Icons.school_rounded, color: AppTheme.primary, size: 18),
+                  child: scholarship.providerLogo == null
+                      ? const Icon(Icons.school_rounded, color: AppTheme.primary, size: 18)
+                      : null,
                 ),
                 const SizedBox(width: 8),
                 Expanded(

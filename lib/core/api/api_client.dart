@@ -112,7 +112,7 @@ class ApiClient {
   Future<Response> getApplications() => _dio.get('/users/applications');
   Future<Response> getAdminUsers() => _dio.get('/admin/users');
 
-  // FCM Token ← méthode propre
+  // FCM Token
   Future<void> updateFcmToken(String? token) =>
       _dio.patch('/users/fcm-token', data: {'fcmToken': token});
 
@@ -123,6 +123,13 @@ class ApiClient {
   Future<Response> markAllNotificationsRead() =>
       _dio.patch('/notifications/read-all');
   Future<Response> getUnreadCount() => _dio.get('/notifications/unread-count');
+  
+  // NOUVELLES MÉTHODES DE SUPPRESSION
+  Future<Response> deleteNotification(String id) =>
+      _dio.delete('/notifications/$id');
+      
+  Future<Response> deleteAllNotifications() =>
+      _dio.delete('/notifications/all');
 
   // Chat
   Future<Response> sendChatMessage({

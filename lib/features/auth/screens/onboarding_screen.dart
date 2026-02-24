@@ -112,150 +112,154 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   @override
   Widget build(BuildContext context) {
-    final page = _pages[_currentPage];
-    
     return Scaffold(
-      body: Container(
-        color: const Color(0xFF1B2FBE), // Couleur unie appliquée ici
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Top bar
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 16, 0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Logo
-                    Row(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Container(
+            color: const Color(0xFF1B2FBE),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // Top bar (fixe)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 16, 16, 0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          width: 32, height: 32,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(Icons.school_rounded, color: Colors.white, size: 18),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text('ScholarHub',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
-                      ],
-                    ),
-                    // Skip
-                    TextButton(
-                      onPressed: () => _finishOnboarding('/auth/login'),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Text('Passer',
-                            style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // PageView
-              Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  onPageChanged: _onPageChanged,
-                  itemCount: _pages.length,
-                  itemBuilder: (_, i) => _OnboardingPage(
-                    data: _pages[i],
-                    fadeAnim: _fadeAnim,
-                    slideAnim: _slideAnim,
-                    floatAnim: _floatAnim,
-                    isActive: i == _currentPage,
-                  ),
-                ),
-              ),
-
-              // Bottom
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
-                child: Column(
-                  children: [
-                    // Indicateurs
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(_pages.length, (i) {
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: _currentPage == i ? 28 : 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: _currentPage == i
-                                ? Colors.white
-                                : Colors.white.withValues(alpha: 0.35),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Bouton principal
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton(
-                        onPressed: _next,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: const Color(0xFF1B2FBE), // Changé pour correspondre
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        // Logo
+                        Row(
                           children: [
-                            Text(
-                              _currentPage == _pages.length - 1
-                                  ? 'Commencer gratuitement'
-                                  : 'Suivant',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                            Container(
+                              width: 32, height: 32,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(Icons.school_rounded, color: Colors.white, size: 18),
                             ),
                             const SizedBox(width: 8),
-                            Icon(
-                              _currentPage == _pages.length - 1
-                                  ? Icons.rocket_launch_rounded
-                                  : Icons.arrow_forward_rounded,
-                              size: 18,
-                            ),
+                            const Text('ScholarHub',
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
                           ],
                         ),
-                      ),
+                        // Skip
+                        TextButton(
+                          onPressed: () => _finishOnboarding('/auth/login'),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text('Passer',
+                                style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 14),
+                  ),
 
-                    // Connexion
-                    GestureDetector(
-                      onTap: () => _finishOnboarding('/auth/login'),
-                      child: RichText(
-                        text: TextSpan(
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 14),
-                          children: const [
-                            TextSpan(text: 'Déjà un compte ? '),
-                            TextSpan(
-                              text: 'Se connecter',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-                            ),
-                          ],
-                        ),
+                  // PageView avec Expanded pour prendre l'espace disponible
+                  Expanded(
+                    child: PageView.builder(
+                      controller: _pageController,
+                      onPageChanged: _onPageChanged,
+                      itemCount: _pages.length,
+                      itemBuilder: (_, i) => _OnboardingPage(
+                        data: _pages[i],
+                        fadeAnim: _fadeAnim,
+                        slideAnim: _slideAnim,
+                        floatAnim: _floatAnim,
+                        isActive: i == _currentPage,
+                        availableHeight: constraints.maxHeight - 180, // Ajusté pour laisser de l'espace
                       ),
                     ),
-                  ],
-                ),
+                  ),
+
+                  // Bottom (fixe) - avec SingleChildScrollView pour éviter les débordements
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Indicateurs
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(_pages.length, (i) {
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              width: _currentPage == i ? 28 : 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: _currentPage == i
+                                    ? Colors.white
+                                    : Colors.white.withValues(alpha: 0.35),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            );
+                          }),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Bouton principal
+                        SizedBox(
+                          width: double.infinity,
+                          height: 54,
+                          child: ElevatedButton(
+                            onPressed: _next,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: const Color(0xFF1B2FBE),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _currentPage == _pages.length - 1
+                                      ? 'Commencer gratuitement'
+                                      : 'Suivant',
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                                ),
+                                const SizedBox(width: 8),
+                                Icon(
+                                  _currentPage == _pages.length - 1
+                                      ? Icons.rocket_launch_rounded
+                                      : Icons.arrow_forward_rounded,
+                                  size: 18,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Connexion
+                        GestureDetector(
+                          onTap: () => _finishOnboarding('/auth/login'),
+                          child: RichText(
+                            text: TextSpan(
+                              style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 14),
+                              children: const [
+                                TextSpan(text: 'Déjà un compte ? '),
+                                TextSpan(
+                                  text: 'Se connecter',
+                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        }
       ),
     );
   }
@@ -267,6 +271,7 @@ class _OnboardingPage extends StatelessWidget {
   final Animation<Offset> slideAnim;
   final Animation<double> floatAnim;
   final bool isActive;
+  final double availableHeight;
 
   const _OnboardingPage({
     required this.data,
@@ -274,122 +279,132 @@ class _OnboardingPage extends StatelessWidget {
     required this.slideAnim,
     required this.floatAnim,
     required this.isActive,
+    required this.availableHeight,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Illustration flottante
-          AnimatedBuilder(
-            animation: floatAnim,
-            builder: (_, child) => Transform.translate(
-              offset: Offset(0, floatAnim.value),
-              child: child,
-            ),
-            child: Container(
-              width: 200, height: 200,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Cercle intérieur
-                  Container(
-                    width: 140, height: 140,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: availableHeight,
+          maxHeight: availableHeight,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 28),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Illustration flottante
+              AnimatedBuilder(
+                animation: floatAnim,
+                builder: (_, child) => Transform.translate(
+                  offset: Offset(0, floatAnim.value),
+                  child: child,
+                ),
+                child: Container(
+                  width: 180, height: 180, // Réduit légèrement
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
                   ),
-                  // Icône principale
-                  Icon(data.icon, size: 72, color: Colors.white),
-                  // Emoji flottant
-                  Positioned(
-                    top: 20, right: 20,
-                    child: Container(
-                      width: 44, height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8),
-                        ],
-                      ),
-                      child: Center(child: Text(data.emoji, style: const TextStyle(fontSize: 22))),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 48),
-
-          // Texte animé
-          FadeTransition(
-            opacity: fadeAnim,
-            child: SlideTransition(
-              position: slideAnim,
-              child: Column(
-                children: [
-                  Text(
-                    data.title,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 30,
-                      fontWeight: FontWeight.w800,
-                      height: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    data.description,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
-                      fontSize: 15,
-                      height: 1.6,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Stats badges
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: data.stats.map((stat) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Cercle intérieur
+                      Container(
+                        width: 130, height: 130,
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(stat.$1,
-                                style: const TextStyle(
-                                    color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16)),
-                            Text(stat.$2,
-                                style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.7), fontSize: 10)),
-                          ],
+                          shape: BoxShape.circle,
                         ),
                       ),
-                    )).toList(),
+                      // Icône principale
+                      Icon(data.icon, size: 64, color: Colors.white),
+                      // Emoji flottant
+                      Positioned(
+                        top: 15, right: 15,
+                        child: Container(
+                          width: 40, height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8),
+                            ],
+                          ),
+                          child: Center(child: Text(data.emoji, style: const TextStyle(fontSize: 20))),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+
+              const SizedBox(height: 32),
+
+              // Texte animé
+              FadeTransition(
+                opacity: fadeAnim,
+                child: SlideTransition(
+                  position: slideAnim,
+                  child: Column(
+                    children: [
+                      Text(
+                        data.title,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 28, // Réduit légèrement
+                          fontWeight: FontWeight.w800,
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        data.description,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          fontSize: 14, // Réduit légèrement
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Stats badges
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: data.stats.map((stat) => Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(stat.$1,
+                                    style: const TextStyle(
+                                        color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15)),
+                                Text(stat.$2,
+                                    style: TextStyle(
+                                        color: Colors.white.withValues(alpha: 0.7), fontSize: 9)),
+                              ],
+                            ),
+                          ),
+                        )).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

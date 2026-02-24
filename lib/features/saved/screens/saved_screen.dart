@@ -290,14 +290,23 @@ class _SavedScholarshipCardState extends State<_SavedScholarshipCard>
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Logo
+                        // Logo (CORRIGÉ)
                         Container(
-                          width: 44, height: 44,
+                          width: 44, 
+                          height: 44,
                           decoration: BoxDecoration(
                             color: AppTheme.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
+                            image: s.providerLogo != null && s.providerLogo!.isNotEmpty
+                                ? DecorationImage(
+                                    image: NetworkImage(s.providerLogo!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
                           ),
-                          child: const Icon(Icons.school_rounded, color: AppTheme.primary, size: 22),
+                          child: s.providerLogo == null || s.providerLogo!.isEmpty
+                              ? const Icon(Icons.school_rounded, color: AppTheme.primary, size: 22)
+                              : null,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
