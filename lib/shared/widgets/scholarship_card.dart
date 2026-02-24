@@ -11,6 +11,23 @@ class ScholarshipCard extends StatelessWidget {
   final Scholarship scholarship;
   const ScholarshipCard({super.key, required this.scholarship});
 
+  String _getLevelLabel(String level) {
+    const labels = {
+      'BEPC': 'BEPC',
+      'BACCALAUREAT': 'Bac',
+      'LICENCE': 'Licence',
+      'MAITRISE': 'Maîtrise',
+      'MASTER': 'Master',
+      'DOCTORAT': 'Doctorat',
+    };
+    return labels[level] ?? level;
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'Date flexible';
+    return DateFormat('dd MMM yyyy', 'fr_FR').format(date);
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -23,32 +40,55 @@ class ScholarshipCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppTheme.border, width: 1.5),
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04), 
+              blurRadius: 8, 
+              offset: const Offset(0, 2)
+            ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header avec logo
             Row(
               children: [
+                // Logo du fournisseur
                 Container(
-                  width: 48, height: 48,
+                  width: 48, 
+                  height: 48,
                   decoration: BoxDecoration(
                     color: AppTheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
+                    image: scholarship.providerLogo != null
+                        ? DecorationImage(
+                            image: NetworkImage(scholarship.providerLogo!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
                   ),
-                  child: const Icon(Icons.school_rounded, color: AppTheme.primary),
+                  child: scholarship.providerLogo == null
+                      ? const Icon(Icons.school_rounded, color: AppTheme.primary)
+                      : null,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(scholarship.provider,
-                          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+                      Text(
+                        scholarship.provider,
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary, 
+                          fontSize: 12
+                        ),
+                      ),
                       Text(
                         scholarship.title,
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600, 
+                          fontSize: 15
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -58,9 +98,34 @@ class ScholarshipCard extends StatelessWidget {
                 _BookmarkButton(scholarship: scholarship),
               ],
             ),
+            
             const SizedBox(height: 12),
 
-            // Footer — type + deadline + montant
+            // Niveaux d'études (tableau)
+            if (scholarship.level.isNotEmpty) ...[
+              Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                children: scholarship.level.map((level) => Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppTheme.secondary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    _getLevelLabel(level),
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.secondary,
+                    ),
+                  ),
+                )).toList(),
+              ),
+              const SizedBox(height: 8),
+            ],
+
+            // Footer avec type, deadline, durée et montant
             Row(
               children: [
                 // Type badge
@@ -73,7 +138,9 @@ class ScholarshipCard extends StatelessWidget {
                   child: Text(
                     scholarship.typeLabel,
                     style: const TextStyle(
-                      color: AppTheme.primary, fontSize: 11, fontWeight: FontWeight.w600,
+                      color: AppTheme.primary, 
+                      fontSize: 11, 
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -86,23 +153,45 @@ class ScholarshipCard extends StatelessWidget {
                   color: scholarship.isExpiringSoon ? AppTheme.accent : AppTheme.textSecondary,
                 ),
                 const SizedBox(width: 4),
-                Expanded(
+                Flexible(
                   child: Text(
-                    DateFormat('dd MMM yyyy', 'fr_FR').format(scholarship.deadline),
+                    _formatDate(scholarship.deadline),
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 11,
                       color: scholarship.isExpiringSoon ? AppTheme.accent : AppTheme.textSecondary,
                       fontWeight: scholarship.isExpiringSoon ? FontWeight.w600 : FontWeight.normal,
                     ),
                   ),
                 ),
 
+                const Spacer(),
+
+                // Durée (si disponible)
+                if (scholarship.duration != null) ...[
+                  Icon(
+                    Icons.schedule_outlined,
+                    size: 13,
+                    color: AppTheme.textSecondary,
+                  ),
+                  const SizedBox(width: 2),
+                  Text(
+                    scholarship.duration!,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+
                 // Montant
                 if (scholarship.amount != null)
                   Text(
                     scholarship.amountFormatted,
                     style: const TextStyle(
-                      fontWeight: FontWeight.w700, color: AppTheme.primary, fontSize: 13,
+                      fontWeight: FontWeight.w700, 
+                      color: AppTheme.primary, 
+                      fontSize: 13,
                     ),
                   ),
               ],
@@ -120,9 +209,33 @@ class ScholarshipCard extends StatelessWidget {
                 child: Text(
                   '⏰ Expire dans ${scholarship.daysLeft} jour(s) !',
                   style: const TextStyle(
-                    color: AppTheme.accent, fontSize: 11, fontWeight: FontWeight.w600,
+                    color: AppTheme.accent, 
+                    fontSize: 11, 
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
+              ),
+            ],
+
+            // Date de début (si disponible)
+            if (scholarship.startDate != null) ...[
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Icon(
+                    Icons.play_circle_outline,
+                    size: 12,
+                    color: AppTheme.textSecondary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Début: ${_formatDate(scholarship.startDate)}',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ],
           ],

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core/theme/app_theme.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -33,21 +32,21 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   int _currentPage = 0;
 
   final List<_OnboardingData> _pages = [
-    _OnboardingData(
+    const _OnboardingData(
       icon: Icons.search_rounded,
       emoji: '🎓',
       title: 'Trouvez votre\nbourse idéale',
       description: 'Plus de 500 bourses pour étudiants africains, centralisées en un seul endroit.',
       stats: [('500+', 'Bourses'), ('54', 'Pays'), ('10k+', 'Étudiants')],
     ),
-    _OnboardingData(
+    const _OnboardingData(
       icon: Icons.auto_awesome_rounded,
       emoji: '🎯',
       title: 'Recommandations\npersonnalisées',
       description: 'Notre algorithme analyse votre profil et vous suggère les meilleures opportunités.',
       stats: [('AI', 'Powered'), ('98%', 'Précision'), ('24/7', 'Dispo')],
     ),
-    _OnboardingData(
+    const _OnboardingData(
       icon: Icons.notifications_active_rounded,
       emoji: '🔔',
       title: 'Ne ratez plus\naucune deadline',

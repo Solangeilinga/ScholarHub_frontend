@@ -101,11 +101,11 @@ class PrivacyPolicyScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: const Color(0xFFE8EAF0)),
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.update_rounded, size: 14, color: AppTheme.textSecondary),
-                        const SizedBox(width: 6),
+                        SizedBox(width: 6),
                         Text(
                           'Dernière mise à jour : 23 février 2026',
                           style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
@@ -123,11 +123,11 @@ class PrivacyPolicyScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppTheme.primary.withValues(alpha: 0.15)),
                     ),
-                    child: Row(
+                    child: const Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('📌', style: TextStyle(fontSize: 18)),
-                        const SizedBox(width: 10),
+                        Text('📌', style: TextStyle(fontSize: 18)),
+                        SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,7 +140,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                                   color: AppTheme.primary,
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4),
                               Text(
                                 'Vos données restent vos données. Nous les utilisons uniquement pour améliorer votre expérience ScholarHub et vous aider à trouver des bourses. Nous ne les vendons jamais.',
                                 style: TextStyle(fontSize: 13, color: AppTheme.textSecondary, height: 1.5),
@@ -166,15 +166,15 @@ class PrivacyPolicyScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: const Color(0xFFE8EAF0)),
                     ),
-                    child: Column(
+                    child: const Column(
                       children: [
-                        const Text('📬', style: TextStyle(fontSize: 32)),
-                        const SizedBox(height: 8),
-                        const Text(
+                        Text('📬', style: TextStyle(fontSize: 32)),
+                        SizedBox(height: 8),
+                        Text(
                           'Des questions sur vos données ?',
                           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4),
                         Text(
                           'privacy@scholarhub.app',
                           style: TextStyle(color: AppTheme.primary, fontSize: 14),
@@ -202,7 +202,7 @@ class _Section {
 
 class _SectionCard extends StatefulWidget {
   final _Section section;
-  const _SectionCard({super.key, required this.section});
+  const _SectionCard({required this.section});
 
   @override
   State<_SectionCard> createState() => _SectionCardState();

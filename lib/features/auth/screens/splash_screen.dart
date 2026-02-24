@@ -123,13 +123,13 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ),
                       const SizedBox(height: 32),
-                      Row(
+                      const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           _StatBadge('500+', 'Bourses'),
-                          const SizedBox(width: 10),
+                          SizedBox(width: 10),
                           _StatBadge('54', 'Pays'),
-                          const SizedBox(width: 10),
+                          SizedBox(width: 10),
                           _StatBadge('10k+', 'Étudiants'),
                         ],
                       ),

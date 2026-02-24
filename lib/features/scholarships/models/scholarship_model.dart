@@ -89,7 +89,6 @@ class Scholarship {
       case 'COMPLETE': return 'Complète';
       case 'PARTIELLE': return 'Partielle';
       case 'RECHERCHE': return 'Recherche';
-      case 'ECHANGE': return 'Échange';
       case 'FORMATION': return 'Formation';
       default: return type;
     }

@@ -122,7 +122,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Center(
           child: TextButton(
             onPressed: () => context.go('/auth/login'),
-            child: Text(
+            child: const Text(
               'Retour à la connexion',
               style: TextStyle(color: AppTheme.textSecondary),
             ),

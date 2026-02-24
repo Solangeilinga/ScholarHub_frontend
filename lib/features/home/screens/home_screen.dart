@@ -199,15 +199,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ),
 
             // Stats
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
                 child: Row(
                   children: [
                     _StatCard(label: '500+', sublabel: 'Bourses', icon: Icons.school_rounded, color: AppTheme.primary),
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     _StatCard(label: '54', sublabel: 'Pays', icon: Icons.public_rounded, color: AppTheme.secondary),
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     _StatCard(label: '10k+', sublabel: 'Étudiants', icon: Icons.people_rounded, color: AppTheme.accent),
                   ],
                 ),
@@ -215,9 +215,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ),
 
             // Featured
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 28, 20, 12),
+                padding: EdgeInsets.fromLTRB(20, 28, 20, 12),
                 child: _SectionHeader(title: 'À la une ⭐', route: '/explore'),
               ),
             ),
@@ -250,9 +250,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ),
 
             // Recommended
-            SliverToBoxAdapter(
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 28, 20, 12),
+                padding: EdgeInsets.fromLTRB(20, 28, 20, 12),
                 child: _SectionHeader(title: 'Recommandations', route: '/explore'),
               ),
             ),

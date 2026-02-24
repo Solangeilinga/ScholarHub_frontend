@@ -102,11 +102,11 @@ class TermsOfServiceScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: const Color(0xFFE8EAF0)),
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.update_rounded, size: 14, color: AppTheme.textSecondary),
-                        const SizedBox(width: 6),
+                        SizedBox(width: 6),
                         Text(
                           'Dernière mise à jour : 23 février 2026',
                           style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
@@ -124,20 +124,20 @@ class TermsOfServiceScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: const Color(0xFF0D0E2E).withValues(alpha: 0.12)),
                     ),
-                    child: Row(
+                    child: const Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('📌', style: TextStyle(fontSize: 18)),
-                        const SizedBox(width: 10),
+                        Text('📌', style: TextStyle(fontSize: 18)),
+                        SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'En résumé',
                                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF0D0E2E)),
                               ),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4),
                               Text(
                                 'ScholarHub est un service gratuit pour trouver des bourses. Fournissez des informations exactes, utilisez le service honnêtement et vérifiez toujours les infos auprès des organismes. Nous ne garantissons pas l\'obtention d\'une bourse.',
                                 style: TextStyle(fontSize: 13, color: AppTheme.textSecondary, height: 1.5),
@@ -163,15 +163,15 @@ class TermsOfServiceScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: const Color(0xFFE8EAF0)),
                     ),
-                    child: Column(
+                    child: const Column(
                       children: [
-                        const Text('⚖️', style: TextStyle(fontSize: 32)),
-                        const SizedBox(height: 8),
-                        const Text(
+                        Text('⚖️', style: TextStyle(fontSize: 32)),
+                        SizedBox(height: 8),
+                        Text(
                           'Des questions sur nos conditions ?',
                           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4),
                         Text(
                           'legal@scholarhub.app',
                           style: TextStyle(color: AppTheme.primary, fontSize: 14),
@@ -199,7 +199,7 @@ class _Section {
 
 class _SectionCard extends StatefulWidget {
   final _Section section;
-  const _SectionCard({super.key, required this.section});
+  const _SectionCard({required this.section});
 
   @override
   State<_SectionCard> createState() => _SectionCardState();

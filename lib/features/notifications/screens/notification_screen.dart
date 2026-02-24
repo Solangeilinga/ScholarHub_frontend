@@ -65,7 +65,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     onDismissed: (_) => context.read<NotificationBloc>().add(MarkReadEvent(notif['id'])),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isRead ? Colors.transparent : AppTheme.primary.withOpacity(0.05),
+                        color: isRead ? Colors.transparent : AppTheme.primary.withValues(alpha: 0.05),
                         border: const Border(bottom: BorderSide(color: AppTheme.border, width: 0.5)),
                       ),
                       child: ListTile(
@@ -73,7 +73,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         leading: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: _notifColor(notif['type']).withOpacity(0.15),
+                            color: _notifColor(notif['type']).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(_notifIcon(notif['type']), color: _notifColor(notif['type']), size: 20),
@@ -133,3 +133,5 @@ class _NotificationScreenState extends State<NotificationScreen> {
     }
   }
 }
+
+

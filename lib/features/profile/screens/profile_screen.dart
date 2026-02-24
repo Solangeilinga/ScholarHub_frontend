@@ -25,7 +25,7 @@ class ProfileScreen extends StatelessWidget {
                 title: const Text('Activer les notifications'),
                 subtitle: const Text('Deadlines, nouvelles bourses...'),
                 value: enabled,
-                activeColor: AppTheme.primary,
+                activeThumbColor: AppTheme.primary,
                 onChanged: (val) async {
                   try {
                     await context.read<ApiClient>().updateProfile({'notificationsEnabled': val});
@@ -175,7 +175,7 @@ class ProfileScreen extends StatelessWidget {
                             () => _showNotificationsDialog(context, notificationsEnabled),
                             trailing: Switch(
                               value: notificationsEnabled,
-                              activeColor: AppTheme.primary,
+                              activeThumbColor: AppTheme.primary,
                               onChanged: (val) async {
                                 await context.read<ApiClient>().updateProfile({'notificationsEnabled': val});
                                 context.read<AuthBloc>().add(AuthCheckEvent());

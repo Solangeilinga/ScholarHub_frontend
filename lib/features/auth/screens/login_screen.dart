@@ -162,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   GestureDetector(
                     onTap: () => context.go('/auth/register'),
                     child: RichText(
-                      text: TextSpan(
+                      text: const TextSpan(
                         text: "Pas encore de compte? ",
                         style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
                         children: [

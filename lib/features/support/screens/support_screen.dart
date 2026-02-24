@@ -70,7 +70,7 @@ class _SupportScreenState extends State<SupportScreen> with SingleTickerProvider
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: const Text('Erreur lors de l\'envoi'), backgroundColor: AppTheme.accent),
+          const SnackBar(content: Text('Erreur lors de l\'envoi'), backgroundColor: AppTheme.accent),
         );
       }
     } finally {
@@ -118,15 +118,15 @@ class _SupportScreenState extends State<SupportScreen> with SingleTickerProvider
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: AppTheme.primary.withValues(alpha: 0.15)),
                   ),
-                  child: Row(
+                  child: const Row(
                     children: [
-                      const Icon(Icons.support_agent_rounded, color: AppTheme.primary, size: 28),
-                      const SizedBox(width: 12),
+                      Icon(Icons.support_agent_rounded, color: AppTheme.primary, size: 28),
+                      SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Besoin d\'aide ?', style: TextStyle(fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                            Text('Besoin d\'aide ?', style: TextStyle(fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
                             Text('Notre équipe vous aide à préparer et soumettre vos candidatures.', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary, height: 1.4)),
                           ],
                         ),

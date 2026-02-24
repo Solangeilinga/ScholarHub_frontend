@@ -40,7 +40,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    for (final c in _controllers) c.dispose();
+    for (final c in _controllers) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -74,7 +76,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppTheme.surface,
-          border: Border(top: BorderSide(color: AppTheme.border, width: 1)),
+          border: const Border(top: BorderSide(color: AppTheme.border, width: 1)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.06),

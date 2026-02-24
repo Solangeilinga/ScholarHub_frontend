@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../bloc/auth_bloc.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/constants/countries.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -20,25 +21,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePassword = true;
   bool _acceptTerms = false;
 
-  static const _africanCountries = [
-    'BF', 'ML', 'NE', 'SN', 'CI', 'TG', 'BJ', 'GN', 'GH', 'NG', 'CM',
-    'CD', 'CG', 'GA', 'ET', 'KE', 'TZ', 'UG', 'RW', 'ZA', 'EG', 'MA',
-    'DZ', 'TN', 'LY', 'MZ', 'ZM', 'MW', 'ZW', 'NA', 'BW', 'MG',
-  ];
-
-  static const _countryNames = {
-    'BF': '🇧🇫 Burkina Faso', 'ML': '🇲🇱 Mali', 'NE': '🇳🇪 Niger',
-    'SN': '🇸🇳 Sénégal', 'CI': '🇨🇮 Côte d\'Ivoire', 'TG': '🇹🇬 Togo',
-    'BJ': '🇧🇯 Bénin', 'GN': '🇬🇳 Guinée', 'GH': '🇬🇭 Ghana',
-    'NG': '🇳🇬 Nigeria', 'CM': '🇨🇲 Cameroun', 'CD': '🇨🇩 RD Congo',
-    'CG': '🇨🇬 Congo', 'GA': '🇬🇦 Gabon', 'ET': '🇪🇹 Éthiopie',
-    'KE': '🇰🇪 Kenya', 'TZ': '🇹🇿 Tanzanie', 'UG': '🇺🇬 Ouganda',
-    'RW': '🇷🇼 Rwanda', 'ZA': '🇿🇦 Afrique du Sud', 'EG': '🇪🇬 Égypte',
-    'MA': '🇲🇦 Maroc', 'DZ': '🇩🇿 Algérie', 'TN': '🇹🇳 Tunisie',
-    'MZ': '🇲🇿 Mozambique', 'ZM': '🇿🇲 Zambie', 'ZW': '🇿🇼 Zimbabwe',
-    'MW': '🇲🇼 Malawi', 'NA': '🇳🇦 Namibie', 'BW': '🇧🇼 Botswana',
-    'MG': '🇲🇬 Madagascar',
-  };
+  // SUPPRIMER ces deux constantes car elles sont maintenant dans countries.dart
+  // static const _africanCountries = [...];
+  // static const _countryNames = {...};
 
   @override
   void dispose() {
@@ -156,13 +141,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 16),
 
+                // CORRECTION: Utiliser africanCountries du fichier partagé
                 DropdownButtonFormField<String>(
                   value: _selectedCountry,
                   hint: const Text('Sélectionner votre pays'),
                   decoration: const InputDecoration(prefixIcon: Icon(Icons.flag_outlined)),
-                  items: _africanCountries.map((code) => DropdownMenuItem(
-                    value: code,
-                    child: Text(_countryNames[code] ?? code),
+                  items: africanCountries.map((country) => DropdownMenuItem(
+                    value: country.code,
+                    child: Text(country.displayName), // Utilise displayName avec drapeau
                   )).toList(),
                   onChanged: (v) => setState(() => _selectedCountry = v),
                 ),

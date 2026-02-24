@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import '../bloc/scholarship_bloc.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/scholarship_card.dart';
@@ -19,8 +18,8 @@ class _ScholarshipListScreenState extends State<ScholarshipListScreen> {
   String? _selectedType;
   String? _selectedLevel;
 
-  final _types = ['COMPLETE', 'PARTIELLE', 'RECHERCHE', 'ECHANGE', 'FORMATION'];
-  final _levels = ['LICENCE', 'MASTER', 'DOCTORAT', 'POSTDOC'];
+  final _types = ['COMPLETE', 'PARTIELLE', 'RECHERCHE', 'FORMATION'];
+  final _levels = ['BEPC','BACCALAUREAT','LICENCE 1', 'LICENCE 2', 'LICENCE 3', 'LICENCE', 'MAITRISE', 'MASTER 1', 'MASTER 2', 'MASTER', 'DOCTORAT 1', 'DOCTORAT 2', 'DOCTORAT'];
 
   @override
   void initState() {
@@ -56,7 +55,7 @@ class _ScholarshipListScreenState extends State<ScholarshipListScreen> {
   String _typeLabel(String type) {
     const labels = {
       'COMPLETE': 'Complète', 'PARTIELLE': 'Partielle',
-      'RECHERCHE': 'Recherche', 'ECHANGE': 'Échange', 'FORMATION': 'Formation',
+      'RECHERCHE': 'Recherche', 'FORMATION': 'Formation',
     };
     return labels[type] ?? type;
   }

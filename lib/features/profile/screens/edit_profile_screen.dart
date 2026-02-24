@@ -104,7 +104,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 16),
 
               DropdownButtonFormField<String>(
-                value: _country,
+                initialValue: _country,
                 hint: const Text('Pays'),
                 decoration: const InputDecoration(prefixIcon: Icon(Icons.flag_outlined)),
                 items: _africanCountries.entries.map((e) => DropdownMenuItem(value: e.key, child: Text(e.value))).toList(),
@@ -113,7 +113,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 16),
 
               DropdownButtonFormField<String>(
-                value: _level,
+                initialValue: _level,
                 hint: const Text('Niveau d\'études'),
                 decoration: const InputDecoration(prefixIcon: Icon(Icons.school_outlined)),
                 items: ['LICENCE', 'MASTER', 'DOCTORAT', 'POSTDOC'].map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),

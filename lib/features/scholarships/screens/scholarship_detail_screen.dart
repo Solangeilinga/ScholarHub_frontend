@@ -3,31 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
 import '../bloc/scholarship_bloc.dart';
 import '../models/scholarship_model.dart';
 import '../../../core/theme/app_theme.dart';
-import 'package:flutter/services.dart';
-
-String countryFlag(String code) {
-  if (code.length != 2) return code;
-  final base = 0x1F1E6 - 0x41;
-  final chars = code.toUpperCase().codeUnits;
-  return String.fromCharCode(base + chars[0]) + String.fromCharCode(base + chars[1]);
-}
-
-String countryName(String code) {
-  const names = {
-    'BF': 'Burkina Faso', 'CI': "Côte d'Ivoire", 'SN': 'Sénégal',
-    'ML': 'Mali', 'GN': 'Guinée', 'TG': 'Togo', 'BJ': 'Bénin',
-    'NE': 'Niger', 'CM': 'Cameroun', 'CD': 'Congo RDC', 'MG': 'Madagascar',
-    'MZ': 'Mozambique', 'TZ': 'Tanzanie', 'KE': 'Kenya', 'GH': 'Ghana',
-    'NG': 'Nigeria', 'ET': 'Éthiopie', 'ZA': 'Afrique du Sud',
-    'MA': 'Maroc', 'TN': 'Tunisie', 'DZ': 'Algérie', 'EG': 'Égypte',
-    'UG': 'Ouganda', 'RW': 'Rwanda', 'ZM': 'Zambie', 'MR': 'Mauritanie',
-    'GA': 'Gabon',
-  };
-  return names[code.toUpperCase()] ?? code;
-}
+import '../../../core/constants/countries.dart';
 
 class ScholarshipDetailScreen extends StatefulWidget {
   final String id;
@@ -42,6 +22,26 @@ class _ScholarshipDetailScreenState extends State<ScholarshipDetailScreen>
   late final AnimationController _controller;
   late final Animation<double> _fade;
   late final Animation<Offset> _slide;
+
+  // Fonction pour traduire les niveaux d'études
+  String _getLevelLabel(String level) {
+    const labels = {
+      'BEPC': 'BEPC',
+      'BACCALAUREAT': 'Baccalauréat',
+      'LICENCE_1': 'Licence 1',
+      'LICENCE_2': 'Licence 2',
+      'LICENCE_3': 'Licence 3',
+      'LICENCE': 'Licence',
+      'MAITRISE': 'Maîtrise',
+      'MASTER_1': 'Master 1',
+      'MASTER_2': 'Master 2',
+      'MASTER': 'Master',
+      'DOCTORAT_1': 'Doctorat 1',
+      'DOCTORAT_2': 'Doctorat 2',
+      'DOCTORAT': 'Doctorat',
+    };
+    return labels[level] ?? level;
+  }
 
   @override
   void initState() {
@@ -87,7 +87,7 @@ class _ScholarshipDetailScreenState extends State<ScholarshipDetailScreen>
           position: _slide,
           child: CustomScrollView(
             slivers: [
-              // AppBar
+              // AppBar SANS le bouton de sauvegarde
               SliverAppBar(
                 backgroundColor: AppTheme.surface,
                 elevation: 0,
@@ -100,24 +100,14 @@ class _ScholarshipDetailScreenState extends State<ScholarshipDetailScreen>
                   s.provider,
                   style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
                 ),
-                actions: [
-                  IconButton(
-                    icon: Icon(
-                      s.isSaved ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
-                      color: AppTheme.primary,
-                    ),
-                    onPressed: () {
-                      context.read<ScholarshipBloc>().add(ToggleSaveEvent(id: s.id, isSaved: s.isSaved));
-                    },
-                  ),
-                ],
+                // SUPPRESSION des actions (plus de bookmark)
               ),
 
               SliverToBoxAdapter(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header
+                    // Header avec logo
                     Container(
                       color: AppTheme.surface,
                       padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
@@ -126,14 +116,23 @@ class _ScholarshipDetailScreenState extends State<ScholarshipDetailScreen>
                         children: [
                           Row(
                             children: [
+                              // Logo du fournisseur (avec gestion d'image)
                               Container(
                                 width: 52, height: 52,
                                 decoration: BoxDecoration(
                                   color: AppTheme.primary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(color: AppTheme.border),
+                                  image: s.providerLogo != null
+                                      ? DecorationImage(
+                                          image: NetworkImage(s.providerLogo!),
+                                          fit: BoxFit.cover,
+                                        )
+                                      : null,
                                 ),
-                                child: const Icon(Icons.school_rounded, color: AppTheme.primary, size: 28),
+                                child: s.providerLogo == null
+                                    ? const Icon(Icons.school_rounded, color: AppTheme.primary, size: 28)
+                                    : null,
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -148,7 +147,9 @@ class _ScholarshipDetailScreenState extends State<ScholarshipDetailScreen>
                                         color: AppTheme.primary.withValues(alpha: 0.08),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
-                                      child: Text(s.typeLabel, style: const TextStyle(color: AppTheme.primary, fontSize: 11, fontWeight: FontWeight.w700)),
+                                      child: Text(s.typeLabel, 
+                                        style: const TextStyle(color: AppTheme.primary, fontSize: 11, fontWeight: FontWeight.w700)
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -168,6 +169,8 @@ class _ScholarshipDetailScreenState extends State<ScholarshipDetailScreen>
                           const SizedBox(height: 16),
                           Text(s.title, style: Theme.of(context).textTheme.headlineMedium),
                           const SizedBox(height: 20),
+                          
+                          // Badges principaux
                           Row(
                             children: [
                               _InfoBadge(Icons.monetization_on_outlined, s.amountFormatted, AppTheme.primary),
@@ -176,6 +179,33 @@ class _ScholarshipDetailScreenState extends State<ScholarshipDetailScreen>
                                   DateFormat('dd MMM yyyy').format(s.deadline), AppTheme.accent),
                             ],
                           ),
+
+                          // Date de début et durée
+                          if (s.startDate != null || s.duration != null) ...[
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                if (s.startDate != null)
+                                  Expanded(
+                                    child: _InfoBadge(
+                                      Icons.play_circle_outline,
+                                      'Début: ${DateFormat('dd MMM yyyy').format(s.startDate!)}',
+                                      AppTheme.secondary,
+                                    ),
+                                  ),
+                                if (s.startDate != null && s.duration != null) 
+                                  const SizedBox(width: 12),
+                                if (s.duration != null)
+                                  Expanded(
+                                    child: _InfoBadge(
+                                      Icons.schedule_outlined,
+                                      'Durée: ${s.duration}',
+                                      AppTheme.secondary,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -194,7 +224,7 @@ class _ScholarshipDetailScreenState extends State<ScholarshipDetailScreen>
                                 style: const TextStyle(height: 1.7, color: AppTheme.textSecondary, fontSize: 15)),
                           ),
 
-                          if (s.requirements != null)
+                          if (s.requirements != null && s.requirements!.isNotEmpty)
                             _Section(
                               title: 'Conditions requises',
                               icon: Icons.checklist_rounded,
@@ -218,7 +248,9 @@ class _ScholarshipDetailScreenState extends State<ScholarshipDetailScreen>
                                         decoration: const BoxDecoration(color: AppTheme.secondary, shape: BoxShape.circle),
                                       ),
                                       const SizedBox(width: 12),
-                                      Expanded(child: Text(b, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 15, height: 1.5))),
+                                      Expanded(child: Text(b, 
+                                        style: const TextStyle(color: AppTheme.textSecondary, fontSize: 15, height: 1.5)
+                                      )),
                                     ],
                                   ),
                                 )).toList(),
@@ -249,12 +281,12 @@ class _ScholarshipDetailScreenState extends State<ScholarshipDetailScreen>
 
                           if (s.level.isNotEmpty)
                             _Section(
-                              title: 'Niveaux d\'études',
+                              title: 'Niveaux requis',
                               icon: Icons.school_outlined,
                               child: Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
-                                children: s.level.map((l) => _Chip(l, AppTheme.primary)).toList(),
+                                children: s.level.map((l) => _Chip(_getLevelLabel(l), AppTheme.primary)).toList(),
                               ),
                             ),
 
@@ -271,75 +303,76 @@ class _ScholarshipDetailScreenState extends State<ScholarshipDetailScreen>
       ),
 
       // Boutons du bas
-    bottomNavigationBar: Container(
-  padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
-  decoration: BoxDecoration(
-    color: AppTheme.surface,
-    border: Border(top: BorderSide(color: AppTheme.border, width: 1.5)),
-    boxShadow: [
-      BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -4)),
-    ],
-  ),
-  child: Row(
-    children: [
-      // Bouton assistance
-      Expanded(
-        child: OutlinedButton.icon(
-          onPressed: () => context.push('/support'),
-          icon: const Icon(Icons.support_agent_rounded, size: 18),
-          label: const Text('Être assisté'),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppTheme.primary,
-            side: const BorderSide(color: AppTheme.primary, width: 1.5),
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
+          border: const Border(top: BorderSide(color: AppTheme.border, width: 1.5)),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -4)),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Bouton assistance
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => context.push('/support'),
+                icon: const Icon(Icons.support_agent_rounded, size: 18),
+                label: const Text('Être assisté'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.primary,
+                  side: const BorderSide(color: AppTheme.primary, width: 1.5),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            
+            // Bouton postuler
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  final rawLink = s.link.trim();
+                  final urlString = rawLink.startsWith('http') ? rawLink : 'https://$rawLink';
+                  final uri = Uri.parse(urlString);
+                  try {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } catch (_) {
+                    try {
+                      await launchUrl(uri, mode: LaunchMode.platformDefault);
+                    } catch (_) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Lien : $urlString'),
+                            action: SnackBarAction(
+                              label: 'Copier',
+                              onPressed: () {
+                                Clipboard.setData(ClipboardData(text: urlString));
+                              },
+                            ),
+                            duration: const Duration(seconds: 5),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        );
+                      }
+                    }
+                  }
+                },
+                icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                label: const Text('Postuler'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
-      const SizedBox(width: 12),
-      // Bouton postuler
-      Expanded(
-  child: ElevatedButton.icon(
-    onPressed: () async {
-      final rawLink = s.link.trim();
-      final urlString = rawLink.startsWith('http') ? rawLink : 'https://$rawLink';
-      final uri = Uri.parse(urlString);
-      try {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } catch (_) {
-        try {
-          await launchUrl(uri, mode: LaunchMode.platformDefault);
-        } catch (_) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Lien : $urlString'),
-                action: SnackBarAction(
-                  label: 'Copier',
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: urlString));
-                  },
-                ),
-                duration: const Duration(seconds: 5),
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            );
-          }
-        }
-      }
-    },
-    icon: const Icon(Icons.open_in_new_rounded, size: 18),
-    label: const Text('Postuler'),
-    style: ElevatedButton.styleFrom(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-    ),
-  ),
-),
-    ],
-  ),
-),
     );
   }
 }
@@ -350,6 +383,7 @@ class _CountryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final country = countryByCode[code];
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -360,9 +394,12 @@ class _CountryChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(countryFlag(code), style: const TextStyle(fontSize: 14)),
+          Text(country?.flag ?? '🌍', style: const TextStyle(fontSize: 14)),
           const SizedBox(width: 6),
-          Text(countryName(code), style: const TextStyle(color: AppTheme.primary, fontSize: 12, fontWeight: FontWeight.w600)),
+          Text(
+            country?.name ?? code,
+            style: const TextStyle(color: AppTheme.primary, fontSize: 12, fontWeight: FontWeight.w600)
+          ),
         ],
       ),
     );
@@ -389,7 +426,9 @@ class _InfoBadge extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 18),
             const SizedBox(width: 8),
-            Expanded(child: Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 13))),
+            Expanded(child: Text(label, 
+              style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 13)
+            )),
           ],
         ),
       ),
@@ -411,7 +450,9 @@ class _Chip extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color.withValues(alpha: 0.2)),
       ),
-      child: Text(label, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
+      child: Text(label, 
+        style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)
+      ),
     );
   }
 }
@@ -433,7 +474,9 @@ class _Section extends StatelessWidget {
             children: [
               Icon(icon, size: 18, color: AppTheme.primary),
               const SizedBox(width: 8),
-              Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+              Text(title, 
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)
+              ),
             ],
           ),
           const SizedBox(height: 4),
