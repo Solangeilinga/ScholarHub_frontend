@@ -114,7 +114,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   )
                 : const Text(
                     'Envoyer les instructions',
-                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: AppTheme.fsBodyLg,
+                        fontWeight: FontWeight.w700),
                   ),
           ),
         ),
@@ -173,7 +176,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               ),
               child: const Text(
                 'Retour à la connexion',
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: AppTheme.fsBodyLg,
+                    fontWeight: FontWeight.w700),
               ),
             ),
           ),

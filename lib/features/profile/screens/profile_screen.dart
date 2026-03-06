@@ -7,44 +7,42 @@ import '../../legal/screens/privacy_policy_screen.dart';
 import '../../legal/screens/terms_of_service_screen.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/display_formatters.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
-  void _showNotificationsDialog(BuildContext context, bool enabled) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Notifications', style: TextStyle(fontWeight: FontWeight.w700)),
-        content: StatefulBuilder(
-          builder: (_, setState) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SwitchListTile(
-                title: const Text('Activer les notifications'),
-                subtitle: const Text('Deadlines, nouvelles bourses...'),
-                value: enabled,
-                activeThumbColor: AppTheme.primary,
-                onChanged: (val) async {
-                  try {
-                    await context.read<ApiClient>().updateProfile({'notificationsEnabled': val});
-                    context.read<AuthBloc>().add(AuthCheckEvent());
-                    setState(() => enabled = val);
-                  } catch (_) {}
-                },
-              ),
-            ],
-          ),
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  bool? _notificationsOverride;
+  bool _updatingNotifications = false;
+
+  Future<void> _updateNotifications(bool value) async {
+    if (_updatingNotifications) return;
+    setState(() {
+      _updatingNotifications = true;
+      _notificationsOverride = value;
+    });
+    try {
+      await context.read<ApiClient>().updateProfile({'notificationsEnabled': value});
+      if (!mounted) return;
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _notificationsOverride = !value);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Impossible de mettre à jour les notifications'),
+          backgroundColor: AppTheme.accent,
         ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Fermer'),
-          ),
-        ],
-      ),
-    );
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _updatingNotifications = false);
+      }
+    }
   }
 
   void _showAboutDialog(BuildContext context) {
@@ -55,26 +53,35 @@ class ProfileScreen extends StatelessWidget {
         title: Row(
           children: [
             Container(
-              width: 40, height: 40,
-              decoration: BoxDecoration(color: AppTheme.primary, borderRadius: BorderRadius.circular(10)),
-              child: const Icon(Icons.school_rounded, color: Colors.white, size: 22),
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                  color: AppTheme.primary,
+                  borderRadius: BorderRadius.circular(10)),
+              child: const Icon(Icons.school_rounded,
+                  color: Colors.white, size: 22),
             ),
             const SizedBox(width: 12),
-            const Text('ScholarHub', style: TextStyle(fontWeight: FontWeight.w700)),
+            const Text('ScholarHub',
+                style: TextStyle(fontWeight: FontWeight.w700)),
           ],
         ),
         content: const Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Version 1.0.0', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+            Text('Version 1.0.0',
+                style: TextStyle(
+                    color: AppTheme.textSecondary, fontSize: AppTheme.fsBodySm)),
             SizedBox(height: 12),
             Text(
               'ScholarHub centralise les bourses d\'études pour les étudiants africains. Notre mission est de rendre l\'accès aux opportunités académiques plus simple et accessible.',
-              style: TextStyle(fontSize: 14, height: 1.5),
+              style: TextStyle(fontSize: AppTheme.fsBodyMd, height: 1.5),
             ),
             SizedBox(height: 12),
-            Text('© 2026 ScholarHub. Tous droits réservés.', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
+            Text('© 2026 ScholarHub. Tous droits réservés.',
+                style: TextStyle(
+                    color: AppTheme.textSecondary, fontSize: AppTheme.fsLabelSm)),
           ],
         ),
         actions: [
@@ -99,7 +106,8 @@ class ProfileScreen extends StatelessWidget {
           final email = user['email'] ?? '';
           final country = user['country'] ?? '';
           final level = user['level'] ?? '';
-          final notificationsEnabled = user['notificationsEnabled'] ?? true;
+          final notificationsEnabled =
+              _notificationsOverride ?? (user['notificationsEnabled'] ?? true);
 
           return CustomScrollView(
             slivers: [
@@ -111,7 +119,8 @@ class ProfileScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       Container(
-                        width: 88, height: 88,
+                        width: 88,
+                        height: 88,
                         decoration: BoxDecoration(
                           color: AppTheme.primary,
                           shape: BoxShape.circle,
@@ -120,35 +129,51 @@ class ProfileScreen extends StatelessWidget {
                         child: Center(
                           child: Text(
                             name.isNotEmpty ? name[0].toUpperCase() : 'S',
-                            style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w800),
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 36,
+                                fontWeight: FontWeight.w800),
                           ),
                         ),
                       ),
                       const SizedBox(height: 14),
-                      Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                      Text(name,
+                          style: const TextStyle(
+                              fontSize: AppTheme.fsHeadlineMd,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textPrimary)),
                       const SizedBox(height: 4),
-                      Text(email, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
+                      Text(email,
+                          style: const TextStyle(
+                              color: AppTheme.textSecondary,
+                              fontSize: AppTheme.fsBodyMd)),
                       const SizedBox(height: 12),
                       if (country.isNotEmpty || level.isNotEmpty)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            if (country.isNotEmpty) _Tag('🌍 $country'),
-                            if (country.isNotEmpty && level.isNotEmpty) const SizedBox(width: 8),
-                            if (level.isNotEmpty) _Tag('🎓 $level'),
+                            if (country.isNotEmpty)
+                              _Tag('🌍 ${formatCountryLabel(country)}'),
+                            if (country.isNotEmpty && level.isNotEmpty)
+                              const SizedBox(width: 8),
+                            if (level.isNotEmpty)
+                              _Tag('🎓 ${formatLevelLabel(level)}'),
                           ],
                         ),
                       const SizedBox(height: 16),
                       SizedBox(
-                        width: 180, height: 42,
+                        width: 180,
+                        height: 42,
                         child: OutlinedButton.icon(
                           onPressed: () => context.push('/profile/edit'),
                           icon: const Icon(Icons.edit_rounded, size: 16),
                           label: const Text('Modifier le profil'),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppTheme.primary,
-                            side: const BorderSide(color: AppTheme.border, width: 1.5),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            side: const BorderSide(
+                                color: AppTheme.border, width: 1.5),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
                           ),
                         ),
                       ),
@@ -167,20 +192,16 @@ class ProfileScreen extends StatelessWidget {
                       _MenuSection(
                         title: 'MON COMPTE',
                         items: [
-                          _MenuItem(Icons.support_agent_rounded, 'Assistance candidature', () => context.push('/support')),
-                          _MenuItem(Icons.person_outlined, 'Modifier le profil', () => context.push('/profile/edit')),
                           _MenuItem(
-                            Icons.notifications_outlined,
-                            'Notifications',
-                            () => _showNotificationsDialog(context, notificationsEnabled),
-                            trailing: Switch(
-                              value: notificationsEnabled,
-                              activeThumbColor: AppTheme.primary,
-                              onChanged: (val) async {
-                                await context.read<ApiClient>().updateProfile({'notificationsEnabled': val});
-                                context.read<AuthBloc>().add(AuthCheckEvent());
-                              },
-                            ),
+                              Icons.support_agent_rounded,
+                              'Assistance candidature',
+                              () => context.push('/support')),
+                          _MenuItem(Icons.person_outlined, 'Modifier le profil',
+                              () => context.push('/profile/edit')),
+                          _NotificationPreferenceTile(
+                            value: notificationsEnabled,
+                            loading: _updatingNotifications,
+                            onChanged: _updateNotifications,
                           ),
                         ],
                       ),
@@ -188,14 +209,19 @@ class ProfileScreen extends StatelessWidget {
                       _MenuSection(
                         title: 'APPLICATION',
                         items: [
-                          _MenuItem(Icons.info_outlined, 'À propos', () => _showAboutDialog(context)),
-                          _MenuItem(Icons.help_outlined, 'Aide & Support', () => context.push('/support')),
+                          _MenuItem(Icons.info_outlined, 'À propos',
+                              () => _showAboutDialog(context)),
+                          _MenuItem(Icons.help_outlined, 'Aide & Support',
+                              () => context.push('/support')),
                           _MenuItem(
                             Icons.star_outline_rounded,
                             'Noter l\'app',
                             () async {
-                              final url = Uri.parse('https://play.google.com/store/apps/details?id=com.scholarhub.scholarhub');
-                              if (await canLaunchUrl(url)) launchUrl(url, mode: LaunchMode.externalApplication);
+                              final url = Uri.parse(
+                                  'https://play.google.com/store/apps/details?id=com.scholarhub.scholarhub');
+                              if (await canLaunchUrl(url))
+                                launchUrl(url,
+                                    mode: LaunchMode.externalApplication);
                             },
                           ),
                         ],
@@ -211,7 +237,8 @@ class ProfileScreen extends StatelessWidget {
                             'Politique de confidentialité',
                             () => Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
+                              MaterialPageRoute(
+                                  builder: (_) => const PrivacyPolicyScreen()),
                             ),
                           ),
                           _MenuItem(
@@ -219,7 +246,8 @@ class ProfileScreen extends StatelessWidget {
                             'Conditions d\'utilisation',
                             () => Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (_) => const TermsOfServiceScreen()),
+                              MaterialPageRoute(
+                                  builder: (_) => const TermsOfServiceScreen()),
                             ),
                           ),
                         ],
@@ -231,31 +259,47 @@ class ProfileScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: AppTheme.surface,
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: AppTheme.border, width: 1.5),
+                          border:
+                              Border.all(color: AppTheme.border, width: 1.5),
                         ),
                         child: ListTile(
-                          leading: const Icon(Icons.logout_rounded, color: AppTheme.accent, size: 22),
-                          title: const Text('Se déconnecter', style: TextStyle(color: AppTheme.accent, fontWeight: FontWeight.w600)),
+                          leading: const Icon(Icons.logout_rounded,
+                              color: AppTheme.accent, size: 22),
+                          title: const Text('Se déconnecter',
+                              style: TextStyle(
+                                  color: AppTheme.accent,
+                                  fontWeight: FontWeight.w600)),
                           onTap: () {
                             showDialog(
                               context: context,
                               builder: (dialogContext) => AlertDialog(
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                title: const Text('Déconnexion', style: TextStyle(fontWeight: FontWeight.w700)),
-                                content: const Text('Voulez-vous vous déconnecter ?'),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16)),
+                                title: const Text('Déconnexion',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.w700)),
+                                content: const Text(
+                                    'Voulez-vous vous déconnecter ?'),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.of(dialogContext).pop(),
-                                    child: const Text('Annuler', style: TextStyle(color: AppTheme.textSecondary)),
+                                    onPressed: () =>
+                                        Navigator.of(dialogContext).pop(),
+                                    child: const Text('Annuler',
+                                        style: TextStyle(
+                                            color: AppTheme.textSecondary)),
                                   ),
                                   ElevatedButton(
                                     onPressed: () {
                                       Navigator.of(dialogContext).pop();
-                                      context.read<AuthBloc>().add(AuthLogoutEvent());
+                                      context
+                                          .read<AuthBloc>()
+                                          .add(AuthLogoutEvent());
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: AppTheme.accent,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
                                     ),
                                     child: const Text('Déconnexion'),
                                   ),
@@ -291,7 +335,11 @@ class _Tag extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.border),
       ),
-      child: Text(label, style: const TextStyle(color: AppTheme.primary, fontSize: 12, fontWeight: FontWeight.w500)),
+      child: Text(label,
+          style: const TextStyle(
+              color: AppTheme.primary,
+              fontSize: AppTheme.fsLabelSm,
+              fontWeight: FontWeight.w500)),
     );
   }
 }
@@ -314,15 +362,24 @@ class _MenuSection extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
-            child: Text(title, style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.8)),
+            child: Text(title,
+                style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: AppTheme.fsBodySm,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8)),
           ),
           ...items.map((item) => Column(
-            children: [
-              if (items.indexOf(item) > 0)
-                const Divider(height: 1, indent: 16, endIndent: 16, color: AppTheme.border),
-              item,
-            ],
-          )),
+                children: [
+                  if (items.indexOf(item) > 0)
+                    const Divider(
+                        height: 1,
+                        indent: 16,
+                        endIndent: 16,
+                        color: AppTheme.border),
+                  item,
+                ],
+              )),
         ],
       ),
     );
@@ -333,17 +390,66 @@ class _MenuItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  final Color? color;
   final Widget? trailing;
-  const _MenuItem(this.icon, this.label, this.onTap, {this.color, this.trailing});
+  const _MenuItem(this.icon, this.label, this.onTap, {this.trailing});
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon, color: color ?? AppTheme.textPrimary, size: 20),
-      title: Text(label, style: TextStyle(color: color ?? AppTheme.textPrimary, fontSize: 15)),
-      trailing: trailing ?? const Icon(Icons.chevron_right_rounded, color: AppTheme.textSecondary, size: 20),
+      leading: Icon(icon, color: AppTheme.textPrimary, size: 20),
+      title: Text(label,
+          style: const TextStyle(
+              color: AppTheme.textPrimary, fontSize: AppTheme.fsBodyMd)),
+      trailing: trailing ??
+          const Icon(Icons.chevron_right_rounded,
+              color: AppTheme.textSecondary, size: 20),
       onTap: onTap,
+    );
+  }
+}
+
+class _NotificationPreferenceTile extends StatelessWidget {
+  final bool value;
+  final bool loading;
+  final ValueChanged<bool> onChanged;
+
+  const _NotificationPreferenceTile({
+    required this.value,
+    required this.loading,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.notifications_outlined,
+          color: AppTheme.textPrimary, size: 20),
+      title: const Text(
+        'Notifications',
+        style: TextStyle(
+            color: AppTheme.textPrimary, fontSize: AppTheme.fsBodyMd),
+      ),
+      trailing: SizedBox(
+        width: 96,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            if (loading)
+              const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            if (loading) const SizedBox(width: 8),
+            Switch(
+              value: value,
+              activeThumbColor: AppTheme.primary,
+              onChanged: loading ? null : onChanged,
+            ),
+          ],
+        ),
+      ),
+      onTap: loading ? null : () => onChanged(!value),
     );
   }
 }

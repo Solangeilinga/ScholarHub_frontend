@@ -67,7 +67,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
               title: const Text(
                 'Politique de confidentialité',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: AppTheme.fsBodyLg,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
                 ),
@@ -108,7 +108,9 @@ class PrivacyPolicyScreen extends StatelessWidget {
                         SizedBox(width: 6),
                         Text(
                           'Dernière mise à jour : 23 février 2026',
-                          style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                          style: TextStyle(
+                              fontSize: AppTheme.fsLabelSm,
+                              color: AppTheme.textSecondary),
                         ),
                       ],
                     ),
@@ -135,7 +137,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                               Text(
                                 'En résumé',
                                 style: TextStyle(
-                                  fontSize: 13,
+                                  fontSize: AppTheme.fsBodySm,
                                   fontWeight: FontWeight.w700,
                                   color: AppTheme.primary,
                                 ),
@@ -143,7 +145,10 @@ class PrivacyPolicyScreen extends StatelessWidget {
                               SizedBox(height: 4),
                               Text(
                                 'Vos données restent vos données. Nous les utilisons uniquement pour améliorer votre expérience ScholarHub et vous aider à trouver des bourses. Nous ne les vendons jamais.',
-                                style: TextStyle(fontSize: 13, color: AppTheme.textSecondary, height: 1.5),
+                                style: TextStyle(
+                                    fontSize: AppTheme.fsBodySm,
+                                    color: AppTheme.textSecondary,
+                                    height: 1.5),
                               ),
                             ],
                           ),
@@ -172,12 +177,16 @@ class PrivacyPolicyScreen extends StatelessWidget {
                         SizedBox(height: 8),
                         Text(
                           'Des questions sur vos données ?',
-                          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: AppTheme.fsBodyMd),
                         ),
                         SizedBox(height: 4),
                         Text(
                           'privacy@scholarhub.app',
-                          style: TextStyle(color: AppTheme.primary, fontSize: 14),
+                          style: TextStyle(
+                              color: AppTheme.primary,
+                              fontSize: AppTheme.fsBodyMd),
                         ),
                       ],
                     ),
@@ -234,7 +243,9 @@ class _SectionCardState extends State<_SectionCard> {
                   Expanded(
                     child: Text(
                       widget.section.title,
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: AppTheme.fsBodyMd),
                     ),
                   ),
                   Icon(
@@ -251,7 +262,10 @@ class _SectionCardState extends State<_SectionCard> {
               padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
               child: Text(
                 widget.section.content,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF6B7299), height: 1.6),
+                style: const TextStyle(
+                    fontSize: AppTheme.fsBodySm,
+                    color: Color(0xFF6B7299),
+                    height: 1.6),
               ),
             ),
         ],

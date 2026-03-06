@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_logo.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -129,17 +131,17 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         // Logo
                         Row(
                           children: [
-                            Container(
-                              width: 32, height: 32,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(Icons.school_rounded, color: Colors.white, size: 18),
+                            const AppLogo(
+                              size: 32,
+                              radius: 8,
+                              isDarkBackground: true,
                             ),
                             const SizedBox(width: 8),
                             const Text('ScholarHub',
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: AppTheme.fsBodyMd)),
                           ],
                         ),
                         // Skip
@@ -152,7 +154,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Text('Passer',
-                                style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: AppTheme.fsBodySm,
+                                    fontWeight: FontWeight.w600)),
                           ),
                         ),
                       ],
@@ -221,7 +226,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                   _currentPage == _pages.length - 1
                                       ? 'Commencer gratuitement'
                                       : 'Suivant',
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                                  style: TextStyle(
+                                      fontSize: AppTheme.fsBodyLg,
+                                      fontWeight: FontWeight.w700),
                                 ),
                                 const SizedBox(width: 8),
                                 Icon(
@@ -241,7 +248,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           onTap: () => _finishOnboarding('/auth/login'),
                           child: RichText(
                             text: TextSpan(
-                              style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 14),
+                              style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.7),
+                                  fontSize: AppTheme.fsBodyMd),
                               children: const [
                                 TextSpan(text: 'Déjà un compte ? '),
                                 TextSpan(
@@ -356,7 +365,7 @@ class _OnboardingPage extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 28, // Réduit légèrement
+                          fontSize: AppTheme.fsDisplayMd, // Réduit légèrement
                           fontWeight: FontWeight.w800,
                           height: 1.2,
                         ),
@@ -367,7 +376,7 @@ class _OnboardingPage extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 14, // Réduit légèrement
+                          fontSize: AppTheme.fsBodyMd, // Réduit légèrement
                           height: 1.5,
                         ),
                       ),
@@ -389,10 +398,13 @@ class _OnboardingPage extends StatelessWidget {
                               children: [
                                 Text(stat.$1,
                                     style: const TextStyle(
-                                        color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15)),
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: AppTheme.fsBodyMd)),
                                 Text(stat.$2,
                                     style: TextStyle(
-                                        color: Colors.white.withValues(alpha: 0.7), fontSize: 9)),
+                                        color: Colors.white.withValues(alpha: 0.7),
+                                        fontSize: AppTheme.fsBodySm)),
                               ],
                             ),
                           ),

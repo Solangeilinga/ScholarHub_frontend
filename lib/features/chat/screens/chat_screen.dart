@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../auth/bloc/auth_bloc.dart';
@@ -31,7 +32,7 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     // Message de bienvenue
     _messages.add(ChatMessage(
-      content: '👋 Hello! Je suis ScholarBot, Ton assistant personnel.\n\n Dans quelle langue souhaitez-vous discuter?',
+      content: '👋 Salut ! Je suis ScholarBot, ton assistant bourses.\n\nDis-moi ton objectif (pays, niveau, domaine) et je te guide directement.',
       isUser: false,
       time: DateTime.now(),
     ));
@@ -112,7 +113,13 @@ class _ChatScreenState extends State<ChatScreen> {
         titleSpacing: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded, color: AppTheme.textPrimary),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home');
+            }
+          },
         ),
         title: Row(
           children: [
@@ -129,12 +136,23 @@ class _ChatScreenState extends State<ChatScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('ScholarBot', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                const Text(
+                  'ScholarBot',
+                  style: TextStyle(
+                      fontSize: AppTheme.fsBodyLg,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary),
+                ),
                 Row(
                   children: [
                     Container(width: 7, height: 7, decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle)),
                     const SizedBox(width: 4),
-                    const Text('En ligne', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                    const Text(
+                      'En ligne',
+                      style: TextStyle(
+                          fontSize: AppTheme.fsBodySm,
+                          color: AppTheme.textSecondary),
+                    ),
                   ],
                 ),
               ],
@@ -149,7 +167,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 _messages.clear();
                 _history.clear();
                 _messages.add(ChatMessage(
-                  content: '👋 Hello! Je suis ScholarBot, Ton assistant personnel.\n\n Dans quelle langue souhaitez-vous communiquer?',
+                  content: '👋 Salut ! Je suis ScholarBot, ton assistant bourses.\n\nDis-moi ton objectif (pays, niveau, domaine) et je te guide directement.',
                   isUser: false,
                   time: DateTime.now(),
                 ));
@@ -182,20 +200,24 @@ class _ChatScreenState extends State<ChatScreen> {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Row(
                 children: [
+                  _QuickSuggestion('🎯 Trouver une bourse', () {
+                    _controller.text = 'Aide-moi à trouver des bourses adaptées à mon profil.';
+                    _sendMessage();
+                  }),
                   _QuickSuggestion('🎓 Bourses Master', () {
                     _controller.text = 'Quelles bourses sont disponibles pour un Master ?';
                     _sendMessage();
                   }),
-                  _QuickSuggestion('🌍 Mon pays', () {
-                    _controller.text = 'Quelles bourses ciblent les étudiants de mon pays ?';
+                  _QuickSuggestion('🌍 Bourses par pays', () {
+                    _controller.text = 'Quelles bourses ciblent les étudiants de mon pays ? Donne-moi les plus pertinentes.';
                     _sendMessage();
                   }),
                   _QuickSuggestion('📝 Lettre de motivation', () {
                     _controller.text = 'Comment rédiger une bonne lettre de motivation ?';
                     _sendMessage();
                   }),
-                  _QuickSuggestion('📅 Deadlines 2026', () {
-                    _controller.text = 'Quelles sont les deadlines importantes en 2026 ?';
+                  _QuickSuggestion('📅 Deadlines proches', () {
+                    _controller.text = 'Quelles sont les deadlines les plus proches à ne pas rater ?';
                     _sendMessage();
                   }),
                 ],
@@ -290,7 +312,7 @@ class _MessageBubble extends StatelessWidget {
                 message.content,
                 style: TextStyle(
                   color: isUser ? Colors.white : AppTheme.textPrimary,
-                  fontSize: 15,
+                  fontSize: AppTheme.fsBodyMd,
                   height: 1.5,
                 ),
               ),
@@ -400,7 +422,13 @@ class _QuickSuggestion extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppTheme.border, width: 1.5),
         ),
-        child: Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppTheme.textPrimary)),
+        child: Text(
+          label,
+          style: const TextStyle(
+              fontSize: AppTheme.fsBodySm,
+              fontWeight: FontWeight.w500,
+              color: AppTheme.textPrimary),
+        ),
       ),
     );
   }

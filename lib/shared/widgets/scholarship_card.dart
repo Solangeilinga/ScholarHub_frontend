@@ -2,36 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../features/scholarships/models/scholarship_model.dart';
 import '../../features/scholarships/bloc/scholarship_bloc.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/display_formatters.dart';
 
 class ScholarshipCard extends StatelessWidget {
   final Scholarship scholarship;
   const ScholarshipCard({super.key, required this.scholarship});
 
-  String _getLevelLabel(String level) {
-    const labels = {
-      'BEPC': 'BEPC',
-      'BACCALAUREAT': 'Bac',
-      'LICENCE': 'Licence',
-      'MAITRISE': 'Maîtrise',
-      'MASTER': 'Master',
-      'DOCTORAT': 'Doctorat',
-    };
-    return labels[level] ?? level;
-  }
-
   String _formatDate(DateTime? date) {
     if (date == null) return 'Date flexible';
-    return DateFormat('dd MMM yyyy', 'fr_FR').format(date);
+    return formatDateFr(date);
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push('/scholarships/${scholarship.id}'),
+      onTap: () =>
+          context.push('/scholarships/${scholarship.id}', extra: scholarship),
       child: Container(
         margin: const EdgeInsets.only(bottom: 4),
         padding: const EdgeInsets.all(16),
@@ -41,10 +30,9 @@ class ScholarshipCard extends StatelessWidget {
           border: Border.all(color: AppTheme.border, width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04), 
-              blurRadius: 8, 
-              offset: const Offset(0, 2)
-            ),
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2)),
           ],
         ),
         child: Column(
@@ -55,7 +43,7 @@ class ScholarshipCard extends StatelessWidget {
               children: [
                 // Logo du fournisseur
                 Container(
-                  width: 48, 
+                  width: 48,
                   height: 48,
                   decoration: BoxDecoration(
                     color: AppTheme.primary.withValues(alpha: 0.1),
@@ -68,7 +56,8 @@ class ScholarshipCard extends StatelessWidget {
                         : null,
                   ),
                   child: scholarship.providerLogo == null
-                      ? const Icon(Icons.school_rounded, color: AppTheme.primary)
+                      ? const Icon(Icons.school_rounded,
+                          color: AppTheme.primary)
                       : null,
                 ),
                 const SizedBox(width: 12),
@@ -78,17 +67,17 @@ class ScholarshipCard extends StatelessWidget {
                     children: [
                       Text(
                         scholarship.provider,
-                        style: const TextStyle(
-                          color: AppTheme.textSecondary, 
-                          fontSize: 12
-                        ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall!
+                            .copyWith(color: AppTheme.textSecondary),
                       ),
                       Text(
                         scholarship.title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600, 
-                          fontSize: 15
-                        ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyLarge!
+                            .copyWith(fontWeight: FontWeight.w600),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -98,7 +87,7 @@ class ScholarshipCard extends StatelessWidget {
                 _BookmarkButton(scholarship: scholarship),
               ],
             ),
-            
+
             const SizedBox(height: 12),
 
             // Niveaux d'études (tableau)
@@ -106,21 +95,25 @@ class ScholarshipCard extends StatelessWidget {
               Wrap(
                 spacing: 4,
                 runSpacing: 4,
-                children: scholarship.level.map((level) => Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppTheme.secondary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    _getLevelLabel(level),
-                    style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                      color: AppTheme.secondary,
-                    ),
-                  ),
-                )).toList(),
+                children: scholarship.level
+                    .map((level) => Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppTheme.secondary.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            formatLevelLabel(level),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall!
+                                .copyWith(
+                                    fontWeight: FontWeight.w500,
+                                    color: AppTheme.secondary),
+                          ),
+                        ))
+                    .toList(),
               ),
               const SizedBox(height: 8),
             ],
@@ -130,18 +123,18 @@ class ScholarshipCard extends StatelessWidget {
               children: [
                 // Type badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppTheme.primary.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     scholarship.typeLabel,
-                    style: const TextStyle(
-                      color: AppTheme.primary, 
-                      fontSize: 11, 
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: AppTheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -150,17 +143,22 @@ class ScholarshipCard extends StatelessWidget {
                 Icon(
                   Icons.calendar_today_outlined,
                   size: 13,
-                  color: scholarship.isExpiringSoon ? AppTheme.accent : AppTheme.textSecondary,
+                  color: scholarship.isExpiringSoon
+                      ? AppTheme.accent
+                      : AppTheme.textSecondary,
                 ),
                 const SizedBox(width: 4),
                 Flexible(
                   child: Text(
                     _formatDate(scholarship.deadline),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: scholarship.isExpiringSoon ? AppTheme.accent : AppTheme.textSecondary,
-                      fontWeight: scholarship.isExpiringSoon ? FontWeight.w600 : FontWeight.normal,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: scholarship.isExpiringSoon
+                              ? AppTheme.accent
+                              : AppTheme.textSecondary,
+                          fontWeight: scholarship.isExpiringSoon
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                        ),
                   ),
                 ),
 
@@ -176,10 +174,9 @@ class ScholarshipCard extends StatelessWidget {
                   const SizedBox(width: 2),
                   Text(
                     scholarship.duration!,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppTheme.textSecondary,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: AppTheme.textSecondary,
+                        ),
                   ),
                   const SizedBox(width: 8),
                 ],
@@ -188,11 +185,10 @@ class ScholarshipCard extends StatelessWidget {
                 if (scholarship.amount != null)
                   Text(
                     scholarship.amountFormatted,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700, 
-                      color: AppTheme.primary, 
-                      fontSize: 13,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.primary,
+                        ),
                   ),
               ],
             ),
@@ -208,11 +204,8 @@ class ScholarshipCard extends StatelessWidget {
                 ),
                 child: Text(
                   '⏰ Expire dans ${scholarship.daysLeft} jour(s) !',
-                  style: const TextStyle(
-                    color: AppTheme.accent, 
-                    fontSize: 11, 
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                      color: AppTheme.accent, fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -230,10 +223,10 @@ class ScholarshipCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Text(
                     'Début: ${_formatDate(scholarship.startDate)}',
-                    style: const TextStyle(
-                      fontSize: 10,
-                      color: AppTheme.textSecondary,
-                    ),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall!
+                        .copyWith(color: AppTheme.textSecondary),
                   ),
                 ],
               ),
@@ -278,13 +271,21 @@ class _BookmarkButtonState extends State<_BookmarkButton>
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(covariant _BookmarkButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.scholarship.isSaved != widget.scholarship.isSaved) {
+      _isSaved = widget.scholarship.isSaved;
+    }
+  }
+
   void _toggle() {
     HapticFeedback.lightImpact();
     setState(() => _isSaved = !_isSaved);
     _controller.forward(from: 0);
     context.read<ScholarshipBloc>().add(
-      ToggleSaveEvent(id: widget.scholarship.id, isSaved: !_isSaved),
-    );
+          ToggleSaveEvent(id: widget.scholarship.id, isSaved: !_isSaved),
+        );
   }
 
   @override
@@ -302,12 +303,15 @@ class _BookmarkButtonState extends State<_BookmarkButton>
         onTap: _toggle,
         child: AnimatedBuilder(
           animation: _scale,
-          builder: (_, child) => Transform.scale(scale: _scale.value, child: child),
+          builder: (_, child) =>
+              Transform.scale(scale: _scale.value, child: child),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _isSaved ? AppTheme.primary.withValues(alpha: 0.1) : Colors.transparent,
+              color: _isSaved
+                  ? AppTheme.primary.withValues(alpha: 0.1)
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
             ),
             child: AnimatedSwitcher(
@@ -317,7 +321,9 @@ class _BookmarkButtonState extends State<_BookmarkButton>
                 child: FadeTransition(opacity: anim, child: child),
               ),
               child: Icon(
-                _isSaved ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
+                _isSaved
+                    ? Icons.bookmark_rounded
+                    : Icons.bookmark_outline_rounded,
                 key: ValueKey(_isSaved),
                 color: _isSaved ? AppTheme.primary : AppTheme.textSecondary,
                 size: 22,

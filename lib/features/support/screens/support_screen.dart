@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/api/api_client.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 
 class SupportScreen extends StatefulWidget {
@@ -10,14 +11,16 @@ class SupportScreen extends StatefulWidget {
   State<SupportScreen> createState() => _SupportScreenState();
 }
 
-class _SupportScreenState extends State<SupportScreen> with SingleTickerProviderStateMixin {
+class _SupportScreenState extends State<SupportScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _subjectCtrl = TextEditingController();
   final _messageCtrl = TextEditingController();
   bool _sending = false;
   List<dynamic> _myTickets = [];
   bool _loadingTickets = true;
-  final Set<String> _deletingIds = {}; // Pour gérer les animations de suppression
+  final Set<String> _deletingIds =
+      {}; // Pour gérer les animations de suppression
 
   @override
   void initState() {
@@ -61,17 +64,21 @@ class _SupportScreenState extends State<SupportScreen> with SingleTickerProvider
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('✅ Demande envoyée ! Nous vous répondrons bientôt.'),
+            content:
+                const Text('✅ Demande envoyée ! Nous vous répondrons bientôt.'),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erreur lors de l\'envoi'), backgroundColor: AppTheme.accent),
+          const SnackBar(
+              content: Text('Erreur lors de l\'envoi'),
+              backgroundColor: AppTheme.accent),
         );
       }
     } finally {
@@ -161,12 +168,13 @@ class _SupportScreenState extends State<SupportScreen> with SingleTickerProvider
         backgroundColor: AppTheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppTheme.textPrimary),
+          icon:
+              const Icon(Icons.arrow_back_rounded, color: AppTheme.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Assistance candidature', 
-          style: TextStyle(fontWeight: FontWeight.w700, color: AppTheme.textPrimary)
-        ),
+        title: Text('Assistance candidature',
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
         bottom: TabBar(
           controller: _tabController,
           labelColor: AppTheme.primary,
@@ -193,22 +201,34 @@ class _SupportScreenState extends State<SupportScreen> with SingleTickerProvider
                   decoration: BoxDecoration(
                     color: AppTheme.primary.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppTheme.primary.withValues(alpha: 0.15)),
+                    border: Border.all(
+                        color: AppTheme.primary.withValues(alpha: 0.15)),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.support_agent_rounded, color: AppTheme.primary, size: 28),
-                      SizedBox(width: 12),
+                      const Icon(Icons.support_agent_rounded,
+                          color: AppTheme.primary, size: 28),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Besoin d\'aide ?', 
-                              style: TextStyle(fontWeight: FontWeight.w700, color: AppTheme.textPrimary)
-                            ),
-                            Text('Notre équipe vous aide à préparer et soumettre vos candidatures.', 
-                              style: TextStyle(fontSize: 12, color: AppTheme.textSecondary, height: 1.4)
-                            ),
+                            Text('Besoin d\'aide ?',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium!
+                                    .copyWith(
+                                        fontWeight: FontWeight.w700,
+                                        color: AppTheme.textPrimary)),
+                            const SizedBox(height: 4),
+                            Text(
+                                'Notre équipe vous aide à préparer et soumettre vos candidatures.',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall!
+                                    .copyWith(
+                                        color: AppTheme.textSecondary,
+                                        height: 1.4)),
                           ],
                         ),
                       ),
@@ -216,24 +236,28 @@ class _SupportScreenState extends State<SupportScreen> with SingleTickerProvider
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text('Sujet', 
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppTheme.textPrimary)
-                ),
+                Text('Sujet',
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary)),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _subjectCtrl,
-                  decoration: const InputDecoration(hintText: 'Ex: Aide pour bourse Eiffel Excellence'),
+                  decoration: const InputDecoration(
+                      hintText: 'Ex: Aide pour bourse Eiffel Excellence'),
                 ),
                 const SizedBox(height: 16),
-                const Text('Message', 
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppTheme.textPrimary)
-                ),
+                Text('Message',
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary)),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _messageCtrl,
                   maxLines: 6,
                   decoration: const InputDecoration(
-                    hintText: 'Décrivez votre situation, votre profil, et comment on peut vous aider...',
+                    hintText:
+                        'Décrivez votre situation, votre profil, et comment on peut vous aider...',
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -243,7 +267,11 @@ class _SupportScreenState extends State<SupportScreen> with SingleTickerProvider
                   child: ElevatedButton.icon(
                     onPressed: _sending ? null : _submit,
                     icon: _sending
-                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 2))
                         : const Icon(Icons.send_rounded),
                     label: Text(_sending ? 'Envoi...' : 'Envoyer la demande'),
                   ),
@@ -260,11 +288,11 @@ class _SupportScreenState extends State<SupportScreen> with SingleTickerProvider
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.inbox_rounded, size: 48, color: AppTheme.textSecondary),
+                          const Icon(Icons.inbox_rounded,
+                              size: 48, color: AppTheme.textSecondary),
                           const SizedBox(height: 12),
-                          const Text('Aucune demande pour le moment', 
-                            style: TextStyle(color: AppTheme.textSecondary)
-                          ),
+                          const Text('Aucune demande pour le moment',
+                              style: TextStyle(color: AppTheme.textSecondary)),
                           const SizedBox(height: 8),
                           TextButton(
                             onPressed: () => _tabController.animateTo(0),
@@ -283,6 +311,10 @@ class _SupportScreenState extends State<SupportScreen> with SingleTickerProvider
                           final ticketId = t['id'].toString();
                           final status = t['status'] as String;
                           final isDeleting = _deletingIds.contains(ticketId);
+                          final createdAt = t['createdAt'] != null
+                              ? DateFormat('dd MMM yyyy', 'fr_FR')
+                                  .format(DateTime.parse(t['createdAt']))
+                              : null;
 
                           // Animation de disparition
                           if (isDeleting) {
@@ -299,18 +331,22 @@ class _SupportScreenState extends State<SupportScreen> with SingleTickerProvider
                                 color: AppTheme.accent,
                                 borderRadius: BorderRadius.circular(14),
                               ),
-                              child: const Icon(Icons.delete_rounded, color: Colors.white, size: 28),
+                              child: const Icon(Icons.delete_rounded,
+                                  color: Colors.white, size: 28),
                             ),
                             confirmDismiss: (direction) async {
                               return await showDialog<bool>(
                                 context: context,
                                 builder: (ctx) => AlertDialog(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16)),
                                   title: const Text('Confirmation'),
-                                  content: const Text('Voulez-vous vraiment supprimer cette demande ?'),
+                                  content: const Text(
+                                      'Voulez-vous vraiment supprimer cette demande ?'),
                                   actions: [
                                     TextButton(
-                                      onPressed: () => Navigator.pop(ctx, false),
+                                      onPressed: () =>
+                                          Navigator.pop(ctx, false),
                                       child: const Text('Annuler'),
                                     ),
                                     ElevatedButton(
@@ -331,69 +367,119 @@ class _SupportScreenState extends State<SupportScreen> with SingleTickerProvider
                               decoration: BoxDecoration(
                                 color: AppTheme.surface,
                                 borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: AppTheme.border, width: 1.5),
+                                border: Border.all(
+                                    color: AppTheme.border, width: 1.5),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
-                                        child: Text(t['subject'], 
-                                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(t['subject'],
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium!
+                                                    .copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w700)),
+                                            if (createdAt != null) ...[
+                                              const SizedBox(height: 2),
+                                              Text(createdAt,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodySmall!
+                                                      .copyWith(
+                                                          color: AppTheme
+                                                              .textSecondary)),
+                                            ],
+                                          ],
                                         ),
                                       ),
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 4),
                                         decoration: BoxDecoration(
                                           color: status == 'OPEN'
-                                              ? Colors.amber.withValues(alpha: 0.1)
+                                              ? Colors.amber
+                                                  .withValues(alpha: 0.1)
                                               : status == 'ANSWERED'
-                                                  ? Colors.green.withValues(alpha: 0.1)
+                                                  ? Colors.green
+                                                      .withValues(alpha: 0.1)
                                                   : AppTheme.border,
-                                          borderRadius: BorderRadius.circular(20),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
                                         ),
                                         child: Text(
-                                          status == 'OPEN' ? '⏳ En attente' 
-                                              : status == 'ANSWERED' ? '✅ Répondu' 
-                                              : '🔒 Fermé',
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                            color: status == 'OPEN' ? Colors.amber[700] 
-                                                : status == 'ANSWERED' ? Colors.green[700] 
-                                                : AppTheme.textSecondary,
-                                          ),
+                                          status == 'OPEN'
+                                              ? '⏳ En attente'
+                                              : status == 'ANSWERED'
+                                                  ? '✅ Répondu'
+                                                  : '🔒 Fermé',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall!
+                                              .copyWith(
+                                                fontWeight: FontWeight.w600,
+                                                color: status == 'OPEN'
+                                                    ? Colors.amber[700]
+                                                    : status == 'ANSWERED'
+                                                        ? Colors.green[700]
+                                                        : AppTheme
+                                                            .textSecondary,
+                                              ),
                                         ),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 8),
-                                  Text(t['message'], 
-                                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13), 
-                                    maxLines: 2, 
-                                    overflow: TextOverflow.ellipsis
-                                  ),
+                                  Text(t['message'],
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall!
+                                          .copyWith(
+                                              color: AppTheme.textSecondary),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis),
                                   if (t['reply'] != null) ...[
                                     const SizedBox(height: 12),
                                     Container(
                                       padding: const EdgeInsets.all(12),
                                       decoration: BoxDecoration(
-                                        color: Colors.green.withValues(alpha: 0.06),
+                                        color: Colors.green
+                                            .withValues(alpha: 0.06),
                                         borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
+                                        border: Border.all(
+                                            color: Colors.green
+                                                .withValues(alpha: 0.2)),
                                       ),
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          const Text('Réponse de l\'équipe :', 
-                                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.green)
-                                          ),
+                                          Text('Réponse de l\'équipe :',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall!
+                                                  .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: Colors.green)),
                                           const SizedBox(height: 4),
-                                          Text(t['reply'], 
-                                            style: const TextStyle(fontSize: 13, color: AppTheme.textPrimary, height: 1.5)
-                                          ),
+                                          Text(t['reply'],
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium!
+                                                  .copyWith(
+                                                      color:
+                                                          AppTheme.textPrimary,
+                                                      height: 1.5)),
                                         ],
                                       ),
                                     ),

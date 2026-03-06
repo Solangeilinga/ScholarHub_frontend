@@ -71,7 +71,10 @@ class TermsOfServiceScreen extends StatelessWidget {
               titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
               title: const Text(
                 "Conditions d'utilisation",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
+                style: TextStyle(
+                    fontSize: AppTheme.fsBodyLg,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white),
               ),
               background: Container(
                 decoration: const BoxDecoration(
@@ -109,7 +112,9 @@ class TermsOfServiceScreen extends StatelessWidget {
                         SizedBox(width: 6),
                         Text(
                           'Dernière mise à jour : 23 février 2026',
-                          style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                          style: TextStyle(
+                              fontSize: AppTheme.fsLabelSm,
+                              color: AppTheme.textSecondary),
                         ),
                       ],
                     ),
@@ -135,12 +140,18 @@ class TermsOfServiceScreen extends StatelessWidget {
                             children: [
                               Text(
                                 'En résumé',
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF0D0E2E)),
+                                style: TextStyle(
+                                    fontSize: AppTheme.fsBodySm,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF0D0E2E)),
                               ),
                               SizedBox(height: 4),
                               Text(
                                 'ScholarHub est un service gratuit pour trouver des bourses. Fournissez des informations exactes, utilisez le service honnêtement et vérifiez toujours les infos auprès des organismes. Nous ne garantissons pas l\'obtention d\'une bourse.',
-                                style: TextStyle(fontSize: 13, color: AppTheme.textSecondary, height: 1.5),
+                                style: TextStyle(
+                                    fontSize: AppTheme.fsBodySm,
+                                    color: AppTheme.textSecondary,
+                                    height: 1.5),
                               ),
                             ],
                           ),
@@ -169,12 +180,16 @@ class TermsOfServiceScreen extends StatelessWidget {
                         SizedBox(height: 8),
                         Text(
                           'Des questions sur nos conditions ?',
-                          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: AppTheme.fsBodyMd),
                         ),
                         SizedBox(height: 4),
                         Text(
                           'legal@scholarhub.app',
-                          style: TextStyle(color: AppTheme.primary, fontSize: 14),
+                          style: TextStyle(
+                              color: AppTheme.primary,
+                              fontSize: AppTheme.fsBodyMd),
                         ),
                       ],
                     ),
@@ -231,7 +246,9 @@ class _SectionCardState extends State<_SectionCard> {
                   Expanded(
                     child: Text(
                       widget.section.title,
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: AppTheme.fsBodyMd),
                     ),
                   ),
                   Icon(
@@ -248,7 +265,10 @@ class _SectionCardState extends State<_SectionCard> {
               padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
               child: Text(
                 widget.section.content,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF6B7299), height: 1.6),
+                style: const TextStyle(
+                    fontSize: AppTheme.fsBodySm,
+                    color: Color(0xFF6B7299),
+                    height: 1.6),
               ),
             ),
         ],

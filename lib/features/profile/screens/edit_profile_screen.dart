@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
+import '../../../core/constants/countries.dart';
+import '../../../core/constants/languages.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/display_formatters.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -22,17 +26,35 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   List<String> _languages = [];
   bool _loading = false;
 
-  static const _africanCountries = {
-    'BF': '🇧🇫 Burkina Faso', 'ML': '🇲🇱 Mali', 'NE': '🇳🇪 Niger',
-    'SN': '🇸🇳 Sénégal', 'CI': '🇨🇮 Côte d\'Ivoire', 'TG': '🇹🇬 Togo',
-    'BJ': '🇧🇯 Bénin', 'GN': '🇬🇳 Guinée', 'GH': '🇬🇭 Ghana',
-    'NG': '🇳🇬 Nigeria', 'CM': '🇨🇲 Cameroun', 'KE': '🇰🇪 Kenya',
-    'ET': '🇪🇹 Éthiopie', 'ZA': '🇿🇦 Afrique du Sud', 'EG': '🇪🇬 Égypte',
-    'MA': '🇲🇦 Maroc', 'DZ': '🇩🇿 Algérie', 'TN': '🇹🇳 Tunisie',
-  };
+  static const _levelCodes = [
+    'BEPC',
+    'BACCALAUREAT',
+    'LICENCE_1',
+    'LICENCE_2',
+    'LICENCE_3',
+    'LICENCE',
+    'MAITRISE',
+    'MASTER_1',
+    'MASTER_2',
+    'MASTER',
+    'DOCTORAT_1',
+    'DOCTORAT_2',
+    'DOCTORAT',
+    'POSTDOC',
+  ];
 
-  static const _domaines = ['STEM', 'Médecine', 'Droit', 'Business', 'Arts', 'Agriculture', 'Éducation', 'Ingénierie', 'Informatique', 'Sciences sociales'];
-  static const _langues = ['Français', 'Anglais', 'Arabe', 'Portugais', 'Swahili'];
+  static const _fieldCodes = [
+    'STEM',
+    'MEDECINE',
+    'DROIT',
+    'BUSINESS',
+    'ARTS',
+    'AGRICULTURE',
+    'EDUCATION',
+    'INGENIERIE',
+    'INFORMATIQUE',
+    'SCIENCES_SOCIALES',
+  ];
 
   @override
   void initState() {
@@ -41,10 +63,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (state is AuthAuthenticatedState) {
       _nameCtrl = TextEditingController(text: state.user['name'] ?? '');
       _bioCtrl = TextEditingController(text: state.user['bio'] ?? '');
-      _country = state.user['country'];
-      _level = state.user['level'];
-      _fields = List<String>.from(state.user['fields'] ?? []);
-      _languages = List<String>.from(state.user['languages'] ?? []);
+      _country = normalizeCountryCode(state.user['country']?.toString());
+      _level = normalizeLevelCode(state.user['level']?.toString());
+      _fields = List<String>.from(state.user['fields'] ?? [])
+          .map((e) => normalizeFieldCode(e.toString()))
+          .where((e) => e.isNotEmpty)
+          .toSet()
+          .toList();
+      _languages = List<String>.from(state.user['languages'] ?? [])
+          .map((e) => normalizeLanguageCode(e.toString()))
+          .whereType<String>()
+          .toSet()
+          .toList();
     } else {
       _nameCtrl = TextEditingController();
       _bioCtrl = TextEditingController();
@@ -54,15 +84,47 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
+
+    final normalizedLevel = normalizeLevelCode(_level);
+    final payload = {
+      'name': _nameCtrl.text.trim(),
+      'bio': _bioCtrl.text.trim(),
+      'country': normalizeCountryCode(_country),
+      'level': normalizedLevel,
+      'fields': _fields.map(normalizeFieldCode).toList(),
+      'languages': _languages
+          .map(normalizeLanguageCode)
+          .whereType<String>()
+          .toList(),
+    };
+
     try {
-      await context.read<ApiClient>().updateProfile({
-        'name': _nameCtrl.text.trim(),
-        'bio': _bioCtrl.text.trim(),
-        'country': _country,
-        'level': _level,
-        'fields': _fields,
-        'languages': _languages,
-      });
+      try {
+        await context.read<ApiClient>().updateProfile(payload);
+      } on DioException catch (e) {
+        final status = e.response?.statusCode ?? 0;
+        final backendError =
+            (e.response?.data is Map<String, dynamic>)
+                ? (e.response?.data['error']?.toString() ?? '')
+                : '';
+        final hasGranularLevel =
+            (normalizedLevel ?? '').contains('_') || (normalizedLevel ?? '') == 'BACCALAUREAT';
+        final isStudyLevelValidationError =
+            backendError.contains('Expected StudyLevel') ||
+            backendError.contains('Invalid value for argument `level`');
+
+        // Compat backend: certains environnements n'acceptent que LICENCE/MASTER/DOCTORAT
+        if ((status == 400 || status == 422 || (status >= 500 && isStudyLevelValidationError)) &&
+            hasGranularLevel) {
+          await context.read<ApiClient>().updateProfile({
+            ...payload,
+            'level': toBaseLevelCode(normalizedLevel),
+          });
+        } else {
+          rethrow;
+        }
+      }
+
       // Refresh auth
       context.read<AuthBloc>().add(AuthCheckEvent());
       if (mounted) {
@@ -72,11 +134,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         context.pop();
       }
     } catch (_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erreur lors de la mise à jour'), backgroundColor: AppTheme.accent),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erreur lors de la mise à jour'), backgroundColor: AppTheme.accent),
+        );
+      }
     } finally {
-      setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 
@@ -107,7 +173,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 initialValue: _country,
                 hint: const Text('Pays'),
                 decoration: const InputDecoration(prefixIcon: Icon(Icons.flag_outlined)),
-                items: _africanCountries.entries.map((e) => DropdownMenuItem(value: e.key, child: Text(e.value))).toList(),
+                items: africanCountries
+                    .map((country) => DropdownMenuItem(
+                          value: country.code,
+                          child: Text(country.displayName),
+                        ))
+                    .toList(),
                 onChanged: (v) => setState(() => _country = v),
               ),
               const SizedBox(height: 16),
@@ -116,7 +187,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 initialValue: _level,
                 hint: const Text('Niveau d\'études'),
                 decoration: const InputDecoration(prefixIcon: Icon(Icons.school_outlined)),
-                items: ['LICENCE', 'MASTER', 'DOCTORAT', 'POSTDOC'].map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
+                items: _levelCodes
+                    .map((code) => DropdownMenuItem(
+                          value: code,
+                          child: Text(formatLevelLabel(code)),
+                        ))
+                    .toList(),
                 onChanged: (v) => setState(() => _level = v),
               ),
               const SizedBox(height: 24),
@@ -125,10 +201,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8, runSpacing: 8,
-                children: _domaines.map((d) => FilterChip(
-                  label: Text(d),
-                  selected: _fields.contains(d),
-                  onSelected: (v) => setState(() => v ? _fields.add(d) : _fields.remove(d)),
+                children: _fieldCodes.map((code) => FilterChip(
+                  label: Text(formatFieldLabel(code)),
+                  selected: _fields.contains(code),
+                  onSelected: (v) => setState(() {
+                    if (v) {
+                      if (!_fields.contains(code)) _fields.add(code);
+                    } else {
+                      _fields.remove(code);
+                    }
+                  }),
                   selectedColor: AppTheme.primary.withOpacity(0.15),
                 )).toList(),
               ),
@@ -138,10 +220,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8, runSpacing: 8,
-                children: _langues.map((l) => FilterChip(
-                  label: Text(l),
-                  selected: _languages.contains(l),
-                  onSelected: (v) => setState(() => v ? _languages.add(l) : _languages.remove(l)),
+                children: languages.map((lang) => FilterChip(
+                  label: Text(lang.name),
+                  selected: _languages.contains(lang.code),
+                  onSelected: (v) => setState(() {
+                    if (v) {
+                      if (!_languages.contains(lang.code)) _languages.add(lang.code);
+                    } else {
+                      _languages.remove(lang.code);
+                    }
+                  }),
                   selectedColor: AppTheme.secondary.withOpacity(0.15),
                 )).toList(),
               ),

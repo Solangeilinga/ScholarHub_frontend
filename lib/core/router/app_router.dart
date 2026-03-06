@@ -35,7 +35,8 @@ class AppRouter {
 
       final authState = context.read<AuthBloc>().state;
       final isLoggedIn = authState is AuthAuthenticatedState;
-      final isLoading = authState is AuthLoadingState || authState is AuthInitialState;
+      final isLoading =
+          authState is AuthLoadingState || authState is AuthInitialState;
       final location = state.matchedLocation;
 
       // Sur le splash — attendre le chargement
@@ -50,12 +51,15 @@ class AppRouter {
       if (isLoading) return null;
 
       // Non connecté → onboarding ou login
-      if (!isLoggedIn && !location.startsWith('/auth') && location != '/onboarding') {
+      if (!isLoggedIn &&
+          !location.startsWith('/auth') &&
+          location != '/onboarding') {
         return '/auth/login';
       }
 
       // Connecté → pas sur auth
-      if (isLoggedIn && (location.startsWith('/auth') || location == '/onboarding')) {
+      if (isLoggedIn &&
+          (location.startsWith('/auth') || location == '/onboarding')) {
         return '/home';
       }
 
@@ -63,19 +67,25 @@ class AppRouter {
     },
     routes: [
       GoRoute(path: '/splash', builder: (_, __) => const SplashScreen()),
-      GoRoute(path: '/onboarding', builder: (_, __) => const OnboardingScreen()),
+      GoRoute(
+          path: '/onboarding', builder: (_, __) => const OnboardingScreen()),
       GoRoute(path: '/auth/login', builder: (_, __) => const LoginScreen()),
-      GoRoute(path: '/auth/register', builder: (_, __) => const RegisterScreen()),
-      GoRoute(path: '/auth/forgot-password', builder: (_, __) => const ForgotPasswordScreen()),
+      GoRoute(
+          path: '/auth/register', builder: (_, __) => const RegisterScreen()),
+      GoRoute(
+          path: '/auth/forgot-password',
+          builder: (_, __) => const ForgotPasswordScreen()),
       GoRoute(
         path: '/scholarships/:id',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, state) => ScholarshipDetailScreen(id: state.pathParameters['id']!),
+        builder: (_, state) =>
+            ScholarshipDetailScreen(id: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/filter',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (_, state) => FilterScreen(filters: state.extra as Map<String, dynamic>?),
+        builder: (_, state) =>
+            FilterScreen(filters: state.extra as Map<String, dynamic>?),
       ),
       GoRoute(
         path: '/profile/edit',
@@ -87,16 +97,44 @@ class AppRouter {
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, __) => const SupportScreen(),
       ),
-      ShellRoute(
-        navigatorKey: _shellNavigatorKey,
-        builder: (_, __, child) => MainScreen(child: child),
-        routes: [
-          GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
-          GoRoute(path: '/explore', builder: (_, __) => const ScholarshipListScreen()),
-          GoRoute(path: '/chat', builder: (_, __) => const ChatScreen()),
-          GoRoute(path: '/saved', builder: (_, __) => const SavedScreen()),
-          GoRoute(path: '/notifications', builder: (_, __) => const NotificationScreen()),
-          GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
+      GoRoute(
+        path: '/notifications',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, __) => const NotificationScreen(),
+      ),
+      StatefulShellRoute.indexedStack(
+        builder: (_, __, navigationShell) =>
+            MainScreen(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(
+            navigatorKey: _shellNavigatorKey,
+            routes: [
+              GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                  path: '/explore',
+                  builder: (_, __) => const ScholarshipListScreen()),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(path: '/chat', builder: (_, __) => const ChatScreen()),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(path: '/saved', builder: (_, __) => const SavedScreen()),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                  path: '/profile', builder: (_, __) => const ProfileScreen()),
+            ],
+          ),
         ],
       ),
     ],

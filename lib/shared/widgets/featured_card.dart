@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../features/scholarships/models/scholarship_model.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/utils/display_formatters.dart';
 
 class FeaturedCard extends StatelessWidget {
   final Scholarship scholarship;
@@ -35,14 +35,16 @@ class FeaturedCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: AppTheme.primary.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     scholarship.typeLabel,
-                    style: const TextStyle(color: AppTheme.primary, fontSize: 11, fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: AppTheme.primary, fontWeight: FontWeight.w600),
                   ),
                 ),
                 Container(
@@ -51,7 +53,8 @@ class FeaturedCard extends StatelessWidget {
                     color: AppTheme.gold.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.star_rounded, color: AppTheme.gold, size: 16),
+                  child: const Icon(Icons.star_rounded,
+                      color: AppTheme.gold, size: 16),
                 ),
               ],
             ),
@@ -74,14 +77,17 @@ class FeaturedCard extends StatelessWidget {
                         : null,
                   ),
                   child: scholarship.providerLogo == null
-                      ? const Icon(Icons.school_rounded, color: AppTheme.primary, size: 18)
+                      ? const Icon(Icons.school_rounded,
+                          color: AppTheme.primary, size: 18)
                       : null,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     scholarship.provider,
-                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.w500),
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: AppTheme.textSecondary,
+                        fontWeight: FontWeight.w500),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -93,12 +99,10 @@ class FeaturedCard extends StatelessWidget {
             // Title
             Text(
               scholarship.title,
-              style: const TextStyle(
-                color: AppTheme.textPrimary,
-                fontWeight: FontWeight.w700,
-                fontSize: 15,
-                height: 1.3,
-              ),
+              style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                  color: AppTheme.textPrimary,
+                  fontWeight: FontWeight.w700,
+                  height: 1.3),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -113,23 +117,30 @@ class FeaturedCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Deadline', style: TextStyle(color: AppTheme.textSecondary, fontSize: 10, fontWeight: FontWeight.w500)),
+                    Text('Deadline',
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                            color: AppTheme.textSecondary,
+                            fontWeight: FontWeight.w500)),
                     Text(
-                      DateFormat('dd MMM yyyy').format(scholarship.deadline),
-                      style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.w700, fontSize: 12),
+                      formatDateFr(scholarship.deadline),
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: AppTheme.textPrimary,
+                          fontWeight: FontWeight.w700),
                     ),
                   ],
                 ),
                 if (scholarship.amount != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: AppTheme.primary,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       scholarship.amountFormatted,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12),
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: Colors.white, fontWeight: FontWeight.w700),
                     ),
                   ),
               ],

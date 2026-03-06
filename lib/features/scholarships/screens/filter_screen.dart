@@ -30,21 +30,19 @@ class _FilterScreenState extends State<FilterScreen> {
   // Niveaux d'études
   final Map<String, String> _levelsMap = {
     'BEPC': 'BEPC',
-      'BACCALAUREAT': 'Baccalauréat',
-      'LICENCE_1': 'Licence 1',
-      'LICENCE_2': 'Licence 2',
-      'LICENCE_3': 'Licence 3',
-      'LICENCE': 'Licence',
-      'MAITRISE': 'Maîtrise',
-      'MASTER_1': 'Master 1',
-      'MASTER_2': 'Master 2',
-      'MASTER': 'Master',
-      'DOCTORAT_1': 'Doctorat 1',
-      'DOCTORAT_2': 'Doctorat 2',
-      'DOCTORAT': 'Doctorat',
+    'BACCALAUREAT': 'Baccalauréat',
+    'LICENCE_1': 'Licence 1',
+    'LICENCE_2': 'Licence 2',
+    'LICENCE_3': 'Licence 3',
+    'LICENCE': 'Licence',
+    'MAITRISE': 'Maîtrise',
+    'MASTER_1': 'Master 1',
+    'MASTER_2': 'Master 2',
+    'MASTER': 'Master',
+    'DOCTORAT_1': 'Doctorat 1',
+    'DOCTORAT_2': 'Doctorat 2',
+    'DOCTORAT': 'Doctorat',
   };
-
-
 
   final _deadlines = {30: '< 30 jours', 60: '< 2 mois', 90: '< 3 mois'};
 
@@ -217,7 +215,10 @@ class _FilterScreenState extends State<FilterScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium!
+                .copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         Wrap(spacing: 8, runSpacing: 8, children: chips),
         const SizedBox(height: 24),

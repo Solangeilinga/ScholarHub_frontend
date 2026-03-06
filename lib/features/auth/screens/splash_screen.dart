@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_logo.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -96,19 +97,24 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Column(
                     children: [
                       Container(
-                        width: 100, height: 100,
+                        width: 100,
+                        height: 100,
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        child: const Icon(Icons.school_rounded, size: 56, color: Colors.white),
+                        child: const AppLogo(
+                          size: 100,
+                          radius: 24,
+                          isDarkBackground: true,
+                        ),
                       ),
                       const SizedBox(height: 28),
                       const Text(
                         'ScholarHub',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 38,
+                          fontSize: AppTheme.fsDisplayLg,
                           fontWeight: FontWeight.w800,
                           letterSpacing: -1,
                         ),
@@ -118,7 +124,7 @@ class _SplashScreenState extends State<SplashScreen>
                         'Votre avenir commence ici',
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.75),
-                          fontSize: 16,
+                          fontSize: AppTheme.fsBodyLg,
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -164,7 +170,9 @@ class _SplashScreenState extends State<SplashScreen>
                             elevation: 0,
                           ),
                           child: const Text('Créer un compte',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                              style: TextStyle(
+                                  fontSize: AppTheme.fsBodyLg,
+                                  fontWeight: FontWeight.w700)),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -177,7 +185,10 @@ class _SplashScreenState extends State<SplashScreen>
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           child: const Text('Se connecter',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                              style: TextStyle(
+                                  fontSize: AppTheme.fsBodyLg,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white)),
                         ),
                       ),
                     ],
@@ -221,8 +232,19 @@ class _StatBadge extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
-          Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 11)),
+          Text(
+            value,
+            style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: AppTheme.fsBodyMd),
+          ),
+          Text(
+            label,
+            style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: AppTheme.fsBodySm),
+          ),
         ],
       ),
     );

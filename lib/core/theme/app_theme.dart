@@ -2,19 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
+  // Echelle typo commune de l'app (référence: labels de navigation type "Profil")
+  static const double fsDisplayLg = 34;
+  static const double fsDisplayMd = 28;
+  static const double fsHeadlineLg = 24;
+  static const double fsHeadlineMd = 20;
+  static const double fsTitleLg = 18;
+  static const double fsBodyLg = 16;
+  static const double fsBodyMd = 14;
+  static const double fsBodySm = 13;
+  static const double fsLabelLg = 14;
+  static const double fsLabelSm = 13;
+  static const double fsNavLabel = 13;
+  static const double fsBadgeSm = 9;
+  static const double fsBadgeXs = 8;
+
   // Couleurs principales — inspirées de l'image
   static const Color primary = Color(0xFF1B2FBE); // Bleu foncé boutons/accents
   static const Color primaryLight =
       Color(0xFF2B3DD4); // Bleu légèrement plus clair
-  static const Color secondary = Color(0xFF4ECDC4); // Turquoise (tags, badges)
+  // couleur secondaire plus grisée pour éléments moins importants
+  static const Color secondary = Color(0xFF4E536F); // Gris-bleu plus contrasté
   static const Color accent = Color(0xFFFF6B6B); // Rouge (alertes, erreurs)
-  static const Color background = Color(0xFFF5F6FF); // Fond légèrement bleuté
+  static const Color background = Color(0xFFEEF1FB); // Fond légèrement bleuté
   static const Color surface = Color(0xFFFFFFFF); // Blanc pur (cartes, inputs)
-  static const Color surfaceVariant = Color(0xFFF0F2FF); // Fond secondaire
+  static const Color surfaceVariant = Color(0xFFE7EBFA); // Fond secondaire
   static const Color textPrimary =
       Color(0xFF0D0E2E); // Texte principal très foncé
-  static const Color textSecondary = Color(0xFF8A8FA8); // Texte secondaire gris
-  static const Color border = Color(0xFFE8EAF0); // Bordures légères
+  static const Color textSecondary =
+      Color(0xFF373B57); // Texte secondaire renforcé
+  static const Color border = Color(0xFFD7DDED); // Bordures plus visibles
   static const Color gold = Color(0xFFFFD700); // Badge AI
 
   // Dark mode
@@ -22,7 +39,7 @@ class AppTheme {
   static const Color darkSurface = Color(0xFF10122A);
   static const Color darkSurfaceVariant = Color(0xFF181A35);
   static const Color darkText = Color(0xFFF0F2FF);
-  static const Color darkTextSecondary = Color(0xFF8A8FA8);
+  static const Color darkTextSecondary = Color(0xFFB2B8D0);
   static const Color darkBorder = Color(0xFF22254A);
 
   static ThemeData get lightTheme {
@@ -38,22 +55,37 @@ class AppTheme {
         onSurface: textPrimary,
       ),
       scaffoldBackgroundColor: background,
+      textSelectionTheme: const TextSelectionThemeData(cursorColor: primary),
 
       textTheme: GoogleFonts.dmSansTextTheme().copyWith(
         displayLarge: GoogleFonts.dmSans(
-            fontSize: 36, fontWeight: FontWeight.w800, color: textPrimary),
+            fontSize: fsDisplayLg,
+            fontWeight: FontWeight.w800,
+            color: textPrimary),
         displayMedium: GoogleFonts.dmSans(
-            fontSize: 28, fontWeight: FontWeight.w800, color: textPrimary),
+            fontSize: fsDisplayMd,
+            fontWeight: FontWeight.w800,
+            color: textPrimary),
         headlineLarge: GoogleFonts.dmSans(
-            fontSize: 24, fontWeight: FontWeight.w700, color: textPrimary),
+            fontSize: fsHeadlineLg,
+            fontWeight: FontWeight.w700,
+            color: textPrimary),
         headlineMedium: GoogleFonts.dmSans(
-            fontSize: 20, fontWeight: FontWeight.w700, color: textPrimary),
+            fontSize: fsHeadlineMd,
+            fontWeight: FontWeight.w700,
+            color: textPrimary),
         titleLarge: GoogleFonts.dmSans(
-            fontSize: 18, fontWeight: FontWeight.w600, color: textPrimary),
-        bodyLarge: GoogleFonts.dmSans(fontSize: 16, color: textPrimary),
-        bodyMedium: GoogleFonts.dmSans(fontSize: 14, color: textSecondary),
-        labelLarge:
-            GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w600),
+            fontSize: fsTitleLg,
+            fontWeight: FontWeight.w600,
+            color: textPrimary),
+        bodyLarge: GoogleFonts.dmSans(fontSize: fsBodyLg, color: textPrimary),
+        bodyMedium: GoogleFonts.dmSans(fontSize: fsBodyMd, color: textPrimary),
+        bodySmall: GoogleFonts.dmSans(fontSize: fsBodySm, color: textPrimary),
+        labelLarge: GoogleFonts.dmSans(
+            fontSize: fsLabelLg,
+            fontWeight: FontWeight.w600,
+            color: textPrimary),
+        labelSmall: GoogleFonts.dmSans(fontSize: fsLabelSm, color: textPrimary),
       ),
 
       appBarTheme: AppBarTheme(
@@ -63,7 +95,7 @@ class AppTheme {
         iconTheme: const IconThemeData(color: textPrimary),
         titleTextStyle: GoogleFonts.dmSans(
           color: textPrimary,
-          fontSize: 20,
+          fontSize: fsHeadlineMd,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -78,7 +110,7 @@ class AppTheme {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,
           textStyle:
-              GoogleFonts.dmSans(fontSize: 16, fontWeight: FontWeight.w700),
+              GoogleFonts.dmSans(fontSize: fsBodyLg, fontWeight: FontWeight.w700),
         ),
       ),
 
@@ -91,7 +123,7 @@ class AppTheme {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           textStyle:
-              GoogleFonts.dmSans(fontSize: 16, fontWeight: FontWeight.w600),
+              GoogleFonts.dmSans(fontSize: fsLabelLg, fontWeight: FontWeight.w600),
         ),
       ),
 
@@ -100,7 +132,7 @@ class AppTheme {
         style: TextButton.styleFrom(
           foregroundColor: primary,
           textStyle:
-              GoogleFonts.dmSans(fontSize: 14, fontWeight: FontWeight.w600),
+              GoogleFonts.dmSans(fontSize: fsLabelSm, fontWeight: FontWeight.w600),
         ),
       ),
 
@@ -130,9 +162,9 @@ class AppTheme {
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-        hintStyle: GoogleFonts.dmSans(color: textSecondary, fontSize: 15),
-        labelStyle: GoogleFonts.dmSans(color: textSecondary, fontSize: 15),
-        errorStyle: GoogleFonts.dmSans(color: accent, fontSize: 12),
+        hintStyle: GoogleFonts.dmSans(color: textSecondary, fontSize: fsBodySm),
+        labelStyle: GoogleFonts.dmSans(color: textSecondary, fontSize: fsBodySm),
+        errorStyle: GoogleFonts.dmSans(color: accent, fontSize: fsBodySm),
       ),
 
       // Cards
@@ -173,9 +205,9 @@ class AppTheme {
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return GoogleFonts.dmSans(
-                fontSize: 12, fontWeight: FontWeight.w600, color: primary);
+                fontSize: fsLabelSm, fontWeight: FontWeight.w600, color: primary);
           }
-          return GoogleFonts.dmSans(fontSize: 12, color: textSecondary);
+          return GoogleFonts.dmSans(fontSize: fsLabelSm, color: textSecondary);
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -192,17 +224,17 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         titleTextStyle: GoogleFonts.dmSans(
           color: textPrimary,
-          fontSize: 18,
+          fontSize: fsTitleLg,
           fontWeight: FontWeight.w700,
         ),
         contentTextStyle:
-            GoogleFonts.dmSans(color: textSecondary, fontSize: 14),
+            GoogleFonts.dmSans(color: textSecondary, fontSize: fsBodyMd),
       ),
 
       // Snackbar
       snackBarTheme: SnackBarThemeData(
         backgroundColor: textPrimary,
-        contentTextStyle: GoogleFonts.dmSans(color: Colors.white, fontSize: 14),
+        contentTextStyle: GoogleFonts.dmSans(color: Colors.white, fontSize: fsBodyMd),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         behavior: SnackBarBehavior.floating,
       ),
@@ -235,19 +267,31 @@ class AppTheme {
       textTheme:
           GoogleFonts.dmSansTextTheme(ThemeData.dark().textTheme).copyWith(
         displayLarge: GoogleFonts.dmSans(
-            fontSize: 36, fontWeight: FontWeight.w800, color: darkText),
+            fontSize: fsDisplayLg,
+            fontWeight: FontWeight.w800,
+            color: darkText),
         displayMedium: GoogleFonts.dmSans(
-            fontSize: 28, fontWeight: FontWeight.w800, color: darkText),
+            fontSize: fsDisplayMd,
+            fontWeight: FontWeight.w800,
+            color: darkText),
         headlineLarge: GoogleFonts.dmSans(
-            fontSize: 24, fontWeight: FontWeight.w700, color: darkText),
+            fontSize: fsHeadlineLg,
+            fontWeight: FontWeight.w700,
+            color: darkText),
         headlineMedium: GoogleFonts.dmSans(
-            fontSize: 20, fontWeight: FontWeight.w700, color: darkText),
+            fontSize: fsHeadlineMd,
+            fontWeight: FontWeight.w700,
+            color: darkText),
         titleLarge: GoogleFonts.dmSans(
-            fontSize: 18, fontWeight: FontWeight.w600, color: darkText),
-        bodyLarge: GoogleFonts.dmSans(fontSize: 16, color: darkText),
-        bodyMedium: GoogleFonts.dmSans(fontSize: 14, color: darkTextSecondary),
+            fontSize: fsTitleLg,
+            fontWeight: FontWeight.w600,
+            color: darkText),
+        bodyLarge: GoogleFonts.dmSans(fontSize: fsBodyLg, color: darkText),
+        bodyMedium: GoogleFonts.dmSans(fontSize: fsBodyMd, color: darkTextSecondary),
+        bodySmall: GoogleFonts.dmSans(fontSize: fsBodySm, color: darkTextSecondary),
         labelLarge: GoogleFonts.dmSans(
-            fontSize: 14, fontWeight: FontWeight.w600, color: darkText),
+            fontSize: fsLabelLg, fontWeight: FontWeight.w600, color: darkText),
+        labelSmall: GoogleFonts.dmSans(fontSize: fsLabelSm, color: darkTextSecondary),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: darkSurface,
@@ -255,7 +299,7 @@ class AppTheme {
         iconTheme: const IconThemeData(color: darkText),
         titleTextStyle: GoogleFonts.dmSans(
           color: darkText,
-          fontSize: 20,
+          fontSize: fsTitleLg,
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -268,7 +312,7 @@ class AppTheme {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,
           textStyle:
-              GoogleFonts.dmSans(fontSize: 16, fontWeight: FontWeight.w700),
+              GoogleFonts.dmSans(fontSize: fsBodyLg, fontWeight: FontWeight.w700),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -301,7 +345,9 @@ class AppTheme {
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-        hintStyle: GoogleFonts.dmSans(color: darkTextSecondary, fontSize: 15),
+        hintStyle: GoogleFonts.dmSans(color: darkTextSecondary, fontSize: fsBodyMd),
+        labelStyle: GoogleFonts.dmSans(color: darkTextSecondary, fontSize: fsBodySm),
+        errorStyle: GoogleFonts.dmSans(color: accent, fontSize: fsBodySm),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
@@ -327,19 +373,34 @@ class AppTheme {
         backgroundColor: darkSurface,
         indicatorColor: primaryLight.withValues(alpha: 0.15),
         elevation: 0,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return GoogleFonts.dmSans(
+                fontSize: fsLabelSm,
+                fontWeight: FontWeight.w600,
+                color: primaryLight);
+          }
+          return GoogleFonts.dmSans(fontSize: fsLabelSm, color: darkTextSecondary);
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: primaryLight, size: 24);
+          }
+          return const IconThemeData(color: darkTextSecondary, size: 24);
+        }),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: darkSurface,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         titleTextStyle: GoogleFonts.dmSans(
-            color: darkText, fontSize: 18, fontWeight: FontWeight.w700),
+            color: darkText, fontSize: fsTitleLg, fontWeight: FontWeight.w700),
         contentTextStyle:
-            GoogleFonts.dmSans(color: darkTextSecondary, fontSize: 14),
+            GoogleFonts.dmSans(color: darkTextSecondary, fontSize: fsBodyMd),
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: darkSurface,
-        contentTextStyle: GoogleFonts.dmSans(color: darkText, fontSize: 14),
+        contentTextStyle: GoogleFonts.dmSans(color: darkText, fontSize: fsBodyMd),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         behavior: SnackBarBehavior.floating,
       ),

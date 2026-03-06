@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import '../../../core/api/api_client.dart';
 import '../../../features/scholarships/bloc/scholarship_bloc.dart';
 import '../../../features/scholarships/models/scholarship_model.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/display_formatters.dart';
 
 class SavedScreen extends StatefulWidget {
   const SavedScreen({super.key});
@@ -44,20 +44,17 @@ class _SavedScreenState extends State<SavedScreen> {
     if (_removingIds.contains(s.id)) return;
     HapticFeedback.lightImpact();
 
-    // 1. Marquer comme en cours de suppression → animation
     setState(() => _removingIds.add(s.id));
 
     try {
-      // 2. Appel API
       await context.read<ApiClient>().unsaveScholarship(s.id);
+      context
+          .read<ScholarshipBloc>()
+          .add(SyncSaveStateEvent(id: s.id, isSaved: false));
+      
+      // ⚡ Animation plus courte
+      await Future.delayed(const Duration(milliseconds: 200));
 
-      // 3. Notifier le ScholarshipBloc pour sync home/explore
-      context.read<ScholarshipBloc>().add(ToggleSaveEvent(id: s.id, isSaved: true));
-
-      // 4. Attendre l'animation de sortie
-      await Future.delayed(const Duration(milliseconds: 350));
-
-      // 5. Supprimer de la liste locale
       if (mounted) {
         setState(() {
           _saved.removeWhere((item) => item.id == s.id);
@@ -65,16 +62,16 @@ class _SavedScreenState extends State<SavedScreen> {
         });
       }
     } catch (_) {
-      // Rollback
-      if (mounted) setState(() => _removingIds.remove(s.id));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Erreur lors de la suppression'),
-          backgroundColor: AppTheme.accent,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
+      if (mounted) {
+        setState(() => _removingIds.remove(s.id));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur lors de la suppression'),
+            backgroundColor: AppTheme.accent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -83,12 +80,20 @@ class _SavedScreenState extends State<SavedScreen> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: BlocListener<ScholarshipBloc, ScholarshipState>(
-        // Écouter si une bourse est unsavée depuis une autre page (ex: detail)
         listenWhen: (_, curr) => curr is ScholarshipSavedToggledState,
         listener: (context, state) {
-          if (state is ScholarshipSavedToggledState && !state.isSaved) {
-            setState(() => _saved.removeWhere((s) => s.id == state.scholarshipId));
+          if (state is! ScholarshipSavedToggledState) return;
+
+          if (!mounted) return;
+
+          if (state.isSaved) {
+            // Un save peut venir d'une autre page (home/liste).
+            // On resynchronise la liste complète pour éviter tout décalage.
+            _loadData();
+            return;
           }
+
+          setState(() => _saved.removeWhere((s) => s.id == state.scholarshipId));
         },
         child: CustomScrollView(
           slivers: [
@@ -98,81 +103,14 @@ class _SavedScreenState extends State<SavedScreen> {
               elevation: 0,
               pinned: true,
               toolbarHeight: 64,
-              flexibleSpace: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Sauvegardées',
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
-                        Text(
-                          _saved.isEmpty
-                              ? 'Aucune bourse'
-                              : '${_saved.length} bourse${_saved.length > 1 ? 's' : ''}',
-                          style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
-                        ),
-                      ],
-                    ),
-                    if (_saved.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primary.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.bookmark_rounded, color: AppTheme.primary, size: 14),
-                            const SizedBox(width: 4),
-                            Text('${_saved.length}',
-                                style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w700, fontSize: 13)),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
+              flexibleSpace: const _AppBarContent(), // ⚡ Widget extrait
             ),
 
             // Contenu
             if (_loading)
               const SliverFillRemaining(child: Center(child: CircularProgressIndicator()))
             else if (_saved.isEmpty)
-              SliverFillRemaining(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 100, height: 100,
-                        decoration: BoxDecoration(
-                          color: AppTheme.primary.withValues(alpha: 0.08),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.bookmark_outline_rounded, size: 48, color: AppTheme.primary),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text('Aucune bourse sauvegardée',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
-                      const SizedBox(height: 8),
-                      const Text('Explorez et sauvegardez des bourses\npour les retrouver ici',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: AppTheme.textSecondary, height: 1.5)),
-                      const SizedBox(height: 28),
-                      ElevatedButton.icon(
-                        onPressed: () => context.go('/explore'),
-                        icon: const Icon(Icons.search_rounded, size: 18),
-                        label: const Text('Explorer les bourses'),
-                      ),
-                    ],
-                  ),
-                ),
-              )
+              const _EmptyState() // ⚡ Widget extrait
             else
               SliverPadding(
                 padding: const EdgeInsets.all(16),
@@ -199,6 +137,109 @@ class _SavedScreenState extends State<SavedScreen> {
   }
 }
 
+// ⚡ Widget AppBar extrait
+class _AppBarContent extends StatelessWidget {
+  const _AppBarContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.findAncestorStateOfType<_SavedScreenState>();
+    final count = state?._saved.length ?? 0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Sauvegardées',
+                  style: TextStyle(
+                      fontSize: AppTheme.fsHeadlineMd,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.textPrimary)),
+              Text(
+                count == 0 ? 'Aucune bourse' : '$count bourse${count > 1 ? 's' : ''}',
+                style: const TextStyle(
+                    fontSize: AppTheme.fsBodySm, color: AppTheme.textSecondary),
+              ),
+            ],
+          ),
+          if (count > 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.bookmark_rounded, color: AppTheme.primary, size: 14),
+                  const SizedBox(width: 4),
+                  Text('$count',
+                      style: const TextStyle(
+                          color: AppTheme.primary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: AppTheme.fsBodySm)),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ⚡ Widget état vide extrait
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverFillRemaining(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.bookmark_outline_rounded, size: 48, color: AppTheme.primary),
+            ),
+            const SizedBox(height: 20),
+            const Text('Aucune bourse sauvegardée',
+                style: TextStyle(
+                    fontSize: AppTheme.fsTitleLg,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary)),
+            const SizedBox(height: 8),
+            const Text('Explorez et sauvegardez des bourses\npour les retrouver ici',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppTheme.textSecondary, height: 1.5)),
+            const SizedBox(height: 28),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 220),
+              child: ElevatedButton.icon(
+                onPressed: () => context.go('/explore'),
+                icon: const Icon(Icons.search_rounded, size: 18),
+                label: const Text('Explorer les bourses'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ⚡ Carte optimisée avec moins d'animations
 class _SavedScholarshipCard extends StatefulWidget {
   final Scholarship scholarship;
   final bool isRemoving;
@@ -220,18 +261,13 @@ class _SavedScholarshipCard extends StatefulWidget {
 class _SavedScholarshipCardState extends State<_SavedScholarshipCard>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _scale;
-  late final Animation<double> _fade;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 350));
-    _scale = Tween<double>(begin: 1.0, end: 0.88).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-    _fade = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200), // ⚡ Plus court
     );
   }
 
@@ -253,132 +289,73 @@ class _SavedScholarshipCardState extends State<_SavedScholarshipCard>
   Widget build(BuildContext context) {
     final s = widget.scholarship;
 
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (_, child) => Opacity(
-        opacity: _fade.value,
-        child: Transform.scale(scale: _scale.value, child: child),
-      ),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: AppTheme.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.border, width: 1.5),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Bande bleue en haut
-              Container(
-                height: 4,
-                decoration: const BoxDecoration(
-                  color: AppTheme.primary,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Logo (CORRIGÉ)
-                        Container(
-                          width: 44, 
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: AppTheme.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                            image: s.providerLogo != null && s.providerLogo!.isNotEmpty
-                                ? DecorationImage(
-                                    image: NetworkImage(s.providerLogo!),
-                                    fit: BoxFit.cover,
-                                  )
-                                : null,
-                          ),
-                          child: s.providerLogo == null || s.providerLogo!.isEmpty
-                              ? const Icon(Icons.school_rounded, color: AppTheme.primary, size: 22)
-                              : null,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(s.provider,
-                                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                              const SizedBox(height: 2),
-                              Text(s.title,
-                                  style: const TextStyle(
-                                      fontSize: 15, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis),
-                            ],
-                          ),
-                        ),
-                        // Bouton unsave avec confirmation
-                        _UnsaveButton(onUnsave: widget.onUnsave),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Infos
-                    Row(
-                      children: [
-                        _InfoTag(Icons.monetization_on_outlined, s.amountFormatted, AppTheme.primary),
-                        const SizedBox(width: 12),
-                        _InfoTag(
-                          Icons.calendar_today_outlined,
-                          DateFormat('dd MMM yyyy', 'fr_FR').format(s.deadline),
-                          s.isExpiringSoon ? AppTheme.accent : AppTheme.textSecondary,
-                        ),
-                      ],
-                    ),
-
-                    if (s.isExpiringSoon) ...[
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppTheme.accent.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          '⏰ Expire dans ${s.daysLeft} jour(s) !',
-                          style: const TextStyle(
-                              color: AppTheme.accent, fontSize: 11, fontWeight: FontWeight.w600),
-                        ),
+    return FadeTransition(
+      opacity: _controller.drive(Tween(begin: 1.0, end: 0.0)),
+      child: SizeTransition( // ⚡ Animation plus légère que Transform.scale
+        sizeFactor: _controller.drive(Tween(begin: 1.0, end: 0.0)),
+        axisAlignment: -1.0,
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: AppTheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.border, width: 1.5),
+              boxShadow: const [
+                BoxShadow(color: Color(0x0A000000), blurRadius: 8, offset: Offset(0, 2)), // ⚡ alpha en dur
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Bande bleue
+                const _TopBar(),
+                
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _CardHeader(
+                        provider: s.provider,
+                        title: s.title,
+                        providerLogo: s.providerLogo,
+                        onUnsave: widget.onUnsave,
                       ),
-                    ],
+                      const SizedBox(height: 12),
 
-                    if (s.fields.isNotEmpty) ...[
-                      const SizedBox(height: 10),
-                      Wrap(
-                        spacing: 6,
-                        children: s.fields.take(2).map((f) => Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: AppTheme.secondary.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(6),
+                      // Infos
+                      Row(
+                        children: [
+                          _InfoTag(
+                            icon: Icons.monetization_on_outlined,
+                            label: s.amountFormatted,
+                            color: AppTheme.primary,
                           ),
-                          child: Text(f,
-                              style: const TextStyle(
-                                  fontSize: 11, color: AppTheme.secondary, fontWeight: FontWeight.w600)),
-                        )).toList(),
+                          const SizedBox(width: 12),
+                          _InfoTag(
+                            icon: Icons.calendar_today_outlined,
+                            label: formatDateFr(s.deadline),
+                            color: s.isExpiringSoon ? AppTheme.accent : AppTheme.textSecondary,
+                          ),
+                        ],
                       ),
+
+                      if (s.isExpiringSoon) ...[
+                        const SizedBox(height: 8),
+                        const _ExpiringBadge(), // ⚡ Widget constant
+                      ],
+
+                      if (s.fields.isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        _FieldsList(fields: s.fields), // ⚡ Widget extrait
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -386,46 +363,148 @@ class _SavedScholarshipCardState extends State<_SavedScholarshipCard>
   }
 }
 
-// Bouton unsave avec confirmation via long press ou tap
-class _UnsaveButton extends StatefulWidget {
-  final VoidCallback onUnsave;
-  const _UnsaveButton({required this.onUnsave});
+// ⚡ Widgets extraits pour la carte
+class _TopBar extends StatelessWidget {
+  const _TopBar();
 
   @override
-  State<_UnsaveButton> createState() => _UnsaveButtonState();
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      height: 4,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppTheme.primary,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+        ),
+      ),
+    );
+  }
 }
 
-class _UnsaveButtonState extends State<_UnsaveButton>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _scale;
+class _CardHeader extends StatelessWidget {
+  final String provider;
+  final String title;
+  final String? providerLogo;
+  final VoidCallback onUnsave;
+
+  const _CardHeader({
+    required this.provider,
+    required this.title,
+    required this.providerLogo,
+    required this.onUnsave,
+  });
 
   @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-    _scale = Tween<double>(begin: 1.0, end: 1.3).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Logo
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: AppTheme.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: providerLogo != null && providerLogo!.isNotEmpty
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    providerLogo!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Icon(Icons.school_rounded, color: AppTheme.primary, size: 22),
+                  ),
+                )
+              : const Icon(Icons.school_rounded, color: AppTheme.primary, size: 22),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(provider,
+                  style: const TextStyle(
+                      fontSize: AppTheme.fsLabelSm, color: AppTheme.textSecondary)),
+              const SizedBox(height: 2),
+              Text(title,
+                  style: const TextStyle(
+                      fontSize: AppTheme.fsBodyMd,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis),
+            ],
+          ),
+        ),
+        // Bouton unsave sans animation
+        _UnsaveButton(onUnsave: onUnsave),
+      ],
     );
   }
+}
+
+class _FieldsList extends StatelessWidget {
+  final List<String> fields;
+
+  const _FieldsList({required this.fields});
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 6,
+      children: fields.take(2).map((f) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: AppTheme.secondary.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(formatFieldLabel(f),
+            style: const TextStyle(
+                fontSize: AppTheme.fsBodySm,
+                color: AppTheme.secondary,
+                fontWeight: FontWeight.w600)),
+      )).toList(),
+    );
   }
+}
 
-  void _onTap() {
-    _controller.forward(from: 0);
+class _ExpiringBadge extends StatelessWidget {
+  const _ExpiringBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppTheme.accent.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: const Text(
+        '⏰ Expire bientôt !',
+        style: TextStyle(
+            color: AppTheme.accent,
+            fontSize: AppTheme.fsBodySm,
+            fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+}
+
+// ⚡ Bouton unsave simplifié (sans animation)
+class _UnsaveButton extends StatelessWidget {
+  final VoidCallback onUnsave;
+
+  const _UnsaveButton({required this.onUnsave});
+
+  void _showConfirmDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Retirer la sauvegarde ?',
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+            style: TextStyle(
+                fontWeight: FontWeight.w700, fontSize: AppTheme.fsBodyLg)),
         content: const Text('Cette bourse sera retirée de votre liste de sauvegarde.'),
         actions: [
           TextButton(
@@ -435,7 +514,7 @@ class _UnsaveButtonState extends State<_UnsaveButton>
           ElevatedButton(
             onPressed: () {
               Navigator.of(dialogContext).pop();
-              widget.onUnsave();
+              onUnsave();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.accent,
@@ -451,28 +530,30 @@ class _UnsaveButtonState extends State<_UnsaveButton>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _onTap,
-      child: AnimatedBuilder(
-        animation: _scale,
-        builder: (_, child) => Transform.scale(scale: _scale.value, child: child),
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppTheme.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: const Icon(Icons.bookmark_rounded, color: AppTheme.primary, size: 20),
+      onTap: () => _showConfirmDialog(context),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppTheme.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
         ),
+        child: const Icon(Icons.bookmark_rounded, color: AppTheme.primary, size: 20),
       ),
     );
   }
 }
 
+// ⚡ Widget InfoTag (constant-friendly)
 class _InfoTag extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
-  const _InfoTag(this.icon, this.label, this.color);
+
+  const _InfoTag({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -481,7 +562,11 @@ class _InfoTag extends StatelessWidget {
       children: [
         Icon(icon, size: 13, color: color),
         const SizedBox(width: 4),
-        Text(label, style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w600)),
+        Text(label,
+            style: TextStyle(
+                fontSize: AppTheme.fsLabelSm,
+                color: color,
+                fontWeight: FontWeight.w600)),
       ],
     );
   }

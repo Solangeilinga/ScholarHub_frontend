@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../bloc/auth_bloc.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/constants/countries.dart';
+import '../../../shared/widgets/app_logo.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -84,13 +85,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Center(
                   child: Column(
                     children: [
-                      Container(
-                        width: 56, height: 56,
-                        decoration: BoxDecoration(
-                          color: AppTheme.primary,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Icon(Icons.school_rounded, color: Colors.white, size: 32),
+                      const AppLogo(
+                        size: 56,
+                        radius: 16,
                       ),
                       const SizedBox(height: 12),
                       Text(

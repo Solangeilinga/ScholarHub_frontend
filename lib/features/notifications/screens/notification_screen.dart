@@ -112,7 +112,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   children: [
                     Icon(Icons.notifications_none_rounded, size: 80, color: AppTheme.textSecondary),
                     SizedBox(height: 16),
-                    Text('Aucune notification', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                    Text(
+                      'Aucune notification',
+                      style: TextStyle(
+                          fontSize: AppTheme.fsTitleLg,
+                          fontWeight: FontWeight.w600),
+                    ),
                   ],
                 ),
               );
@@ -195,8 +200,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             Text(notif['body'], style: const TextStyle(color: AppTheme.textSecondary)),
                             const SizedBox(height: 4),
                             Text(
-                              DateFormat('dd MMM · HH:mm').format(DateTime.parse(notif['createdAt'])),
-                              style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                              DateFormat('dd MMM · HH:mm', 'fr_FR')
+                                  .format(DateTime.parse(notif['createdAt'])),
+                              style: const TextStyle(
+                                  fontSize: AppTheme.fsBodySm,
+                                  color: AppTheme.textSecondary),
                             ),
                           ],
                         ),

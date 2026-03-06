@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../bloc/auth_bloc.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_logo.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,9 +28,9 @@ class _LoginScreenState extends State<LoginScreen> {
   void _submit() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(AuthLoginEvent(
-        email: _emailCtrl.text.trim(),
-        password: _passwordCtrl.text,
-      ));
+            email: _emailCtrl.text.trim(),
+            password: _passwordCtrl.text,
+          ));
     }
   }
 
@@ -45,7 +46,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 content: Text(state.message),
                 backgroundColor: AppTheme.accent,
                 behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
             );
           } else if (state is AuthAuthenticatedState) {
@@ -63,23 +65,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 48),
 
                   // Logo centré
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: AppTheme.primary,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Icon(Icons.school_rounded, color: Colors.white, size: 32),
+                  const AppLogo(
+                    size: 56,
+                    radius: 16,
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'ScholarHub',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppTheme.primary,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                    ),
+                          color: AppTheme.primary,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                        ),
                   ),
 
                   const SizedBox(height: 40),
@@ -89,10 +86,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     alignment: Alignment.center,
                     child: Text(
                       'Connectez-vous à votre compte',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.textPrimary,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.textPrimary,
+                              ),
                     ),
                   ),
                   const SizedBox(height: 28),
@@ -102,7 +100,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _emailCtrl,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(hintText: 'Email'),
-                    validator: (v) => v!.contains('@') ? null : 'Email invalide',
+                    validator: (v) =>
+                        v!.contains('@') ? null : 'Email invalide',
                   ),
                   const SizedBox(height: 14),
 
@@ -114,14 +113,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       hintText: 'Password',
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
                           color: AppTheme.textSecondary,
                           size: 20,
                         ),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword),
                       ),
                     ),
-                    validator: (v) => v!.length >= 8 ? null : 'Minimum 8 caractères',
+                    validator: (v) =>
+                        v!.length >= 8 ? null : 'Minimum 8 caractères',
                   ),
                   const SizedBox(height: 8),
 
@@ -130,8 +133,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () => context.push('/auth/forgot-password'),
-                      style: TextButton.styleFrom(foregroundColor: AppTheme.textSecondary),
-                      child: const Text('Mot de passe oublié ?', style: TextStyle(fontSize: 13)),
+                      style: TextButton.styleFrom(
+                          foregroundColor: AppTheme.textSecondary),
+                      child: const Text('Mot de passe oublié ?',
+                          style: TextStyle(fontSize: AppTheme.fsBodySm)),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -146,12 +151,21 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: state is AuthLoadingState ? null : _submit,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primary,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
                             elevation: 0,
                           ),
                           child: state is AuthLoadingState
-                              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                              : const Text('Se connecter', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white, strokeWidth: 2))
+                              : const Text('Se connecter',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: AppTheme.fsBodyLg,
+                                      fontWeight: FontWeight.w700)),
                         ),
                       );
                     },
@@ -164,11 +178,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: RichText(
                       text: const TextSpan(
                         text: "Pas encore de compte? ",
-                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
+                        style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: AppTheme.fsBodyMd),
                         children: [
                           TextSpan(
                             text: "S'inscrire ",
-                            style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w700),
+                            style: TextStyle(
+                                color: AppTheme.primary,
+                                fontWeight: FontWeight.w700),
                           ),
                         ],
                       ),
@@ -180,29 +198,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _SocialButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  const _SocialButton({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 64,
-        height: 52,
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.border, width: 1.5),
-        ),
-        child: Icon(icon, color: AppTheme.primary, size: 28),
       ),
     );
   }
