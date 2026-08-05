@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient {
   static const String baseUrl =
-      'https://scholarhubbackend-production.up.railway.app/api';
+      'https://scholarhub-backend-n8de.onrender.com/api';
 
   late final Dio _dio;
 
@@ -53,7 +53,7 @@ class ApiClient {
   Future<void> _wakeUpServer() async {
     try {
       await Dio().get(
-        'https://scholarhubbackend-production.up.railway.app/health',
+        'https://scholarhub-backend-n8de.onrender.com/health',
         options: Options(
           sendTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 10),
@@ -101,8 +101,6 @@ class ApiClient {
       _dio.post('/scholarships/$id/save');
   Future<Response> unsaveScholarship(String id) =>
       _dio.delete('/scholarships/$id/save');
-  Future<Response> deleteScholarship(String id) =>
-      _dio.delete('/admin/scholarships/$id');
 
   // Users
   Future<Response> getProfile() => _dio.get('/users/profile');
@@ -110,7 +108,6 @@ class ApiClient {
       _dio.put('/users/profile', data: data);
   Future<Response> getSaved() => _dio.get('/users/saved');
   Future<Response> getApplications() => _dio.get('/users/applications');
-  Future<Response> getAdminUsers() => _dio.get('/admin/users');
 
   // FCM Token
   Future<void> updateFcmToken(String? token) =>
@@ -140,6 +137,7 @@ class ApiClient {
         'messages': messages,
         if (userProfile != null) 'userProfile': userProfile,
       });
+  Future<Response> getChatHistory() => _dio.get('/chat/history');
 
   // Support
   Future<Response> createSupportTicket(Map<String, dynamic> data) =>

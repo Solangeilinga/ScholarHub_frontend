@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -16,6 +17,8 @@ import 'features/auth/screens/onboarding_screen.dart';
 import 'features/scholarships/bloc/scholarship_bloc.dart';
 import 'features/notifications/bloc/notification_bloc.dart';
 import 'core/services/firebase_service.dart';
+import 'firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'shared/widgets/app_logo.dart';
 
 void main() async {
@@ -26,9 +29,15 @@ void main() async {
   await OnboardingScreen.resetIfNewVersion();
 
   // 2. Initialisation Hive pour le cache local
+  // Sur web, pas de vrai système de fichiers : path_provider n'y est pas
+  // disponible, Hive utilise IndexedDB automatiquement sans chemin.
   try {
-    final appDocumentDir = await getApplicationDocumentsDirectory();
-    await Hive.initFlutter(appDocumentDir.path);
+    if (kIsWeb) {
+      await Hive.initFlutter();
+    } else {
+      final appDocumentDir = await getApplicationDocumentsDirectory();
+      await Hive.initFlutter(appDocumentDir.path);
+    }
     await CacheService().init(); // Initialise toutes les boxes Hive
     debugPrint('✅ Hive initialisé');
   } catch (e) {
@@ -38,7 +47,7 @@ void main() async {
   // 3. Configuration du cache des images
   _configureImageCache();
 
-  // 4. Configuration des orientations
+  // 4. Configuration des orientations (no-op sur web, mais sans danger)
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -87,6 +96,7 @@ class _ScholarHubAppState extends State<ScholarHubApp> {
 
   Future<void> _initFirebase() async {
     try {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
       await FirebaseService.initialize(_apiClient);
     } catch (e) {
       debugPrint('Firebase init error: $e');

@@ -1,12 +1,16 @@
 {
-    "name": "scholarhub",
-    "short_name": "scholarhub",
+    "name": "ScholarHub - Bourses d'études Afrique",
+    "short_name": "ScholarHub",
     "start_url": ".",
+    "id": "/",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "display_override": ["standalone", "minimal-ui"],
+    "background_color": "#EEF1FB",
+    "theme_color": "#1B2FBE",
+    "description": "Centralisation des bourses d'études pour étudiants africains — recherche, suivi de candidature et assistant IA.",
     "orientation": "portrait-primary",
+    "lang": "fr",
+    "categories": ["education"],
     "prefer_related_applications": false,
     "icons": [
         {

@@ -30,12 +30,46 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    // Message de bienvenue
-    _messages.add(ChatMessage(
-      content: '👋 Salut ! Je suis ScholarBot, ton assistant bourses.\n\nDis-moi ton objectif (pays, niveau, domaine) et je te guide directement.',
-      isUser: false,
-      time: DateTime.now(),
-    ));
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    try {
+      final response = await context.read<ApiClient>().getChatHistory();
+      final List<dynamic> saved = response.data['messages'] ?? [];
+
+      if (saved.isEmpty) {
+        _showWelcomeMessage();
+        return;
+      }
+
+      setState(() {
+        for (final m in saved) {
+          final isUser = m['role'] == 'user';
+          _messages.add(ChatMessage(
+            content: m['content'] as String,
+            isUser: isUser,
+            time: DateTime.tryParse(m['createdAt'] ?? '') ?? DateTime.now(),
+          ));
+          _history.add({'role': m['role'] as String, 'content': m['content'] as String});
+        }
+      });
+      _scrollToBottom();
+    } catch (_) {
+      // Historique indisponible (hors ligne, erreur réseau...) — on démarre
+      // simplement une nouvelle conversation plutôt que de bloquer l'écran.
+      _showWelcomeMessage();
+    }
+  }
+
+  void _showWelcomeMessage() {
+    setState(() {
+      _messages.add(ChatMessage(
+        content: '👋 Salut ! Je suis ScholarBot, ton assistant bourses.\n\nDis-moi ton objectif (pays, niveau, domaine) et je te guide directement.',
+        isUser: false,
+        time: DateTime.now(),
+      ));
+    });
   }
 
   @override
