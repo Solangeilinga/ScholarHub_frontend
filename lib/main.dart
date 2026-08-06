@@ -17,6 +17,7 @@ import 'features/auth/screens/onboarding_screen.dart';
 import 'features/scholarships/bloc/scholarship_bloc.dart';
 import 'features/notifications/bloc/notification_bloc.dart';
 import 'core/services/firebase_service.dart';
+import 'core/services/pwa_install_service.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'shared/widgets/app_logo.dart';
@@ -148,6 +149,13 @@ class _ScholarHubAppState extends State<ScholarHubApp> {
           listener: (context, state) {
             // Rafraîchit le router à chaque changement d'état auth
             AppRouter.router.refresh();
+
+            // Propose l'installation de la PWA juste après une connexion
+            // réussie (meilleur moment qu'au chargement de la page : la
+            // personne est engagée, on sait qu'elle utilise vraiment l'app).
+            if (state is AuthAuthenticatedState) {
+              PwaInstallService.showInstallBanner();
+            }
           },
           child: MaterialApp.router(
             title: 'ScholarHub',
