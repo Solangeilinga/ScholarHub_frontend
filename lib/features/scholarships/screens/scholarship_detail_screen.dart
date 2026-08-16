@@ -181,6 +181,23 @@ class _ScholarshipDetailScreenState extends State<ScholarshipDetailScreen>
                                                   color: AppTheme.primary,
                                                   fontWeight: FontWeight.w700)),
                                     ),
+                                    if (s.typeDetails != null &&
+                                        s.typeDetails!.trim().isNotEmpty)
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(top: 4),
+                                        child: Text(
+                                          s.typeDetails!,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall!
+                                              .copyWith(
+                                                  color: AppTheme
+                                                      .textSecondary,
+                                                  fontStyle:
+                                                      FontStyle.italic),
+                                        ),
+                                      ),
                                   ],
                                 ),
                               ),

@@ -28,6 +28,8 @@ class Scholarship extends Equatable {
   // @HiveField(5)
   final String type;
 
+  final String? typeDetails;
+
   // @HiveField(6)
   final List<String> countries;
 
@@ -86,6 +88,7 @@ class Scholarship extends Equatable {
     required this.provider,
     this.providerLogo,
     required this.type,
+    this.typeDetails,
     required this.countries,
     required this.fields,
     required this.level,
@@ -121,6 +124,7 @@ class Scholarship extends Equatable {
         provider: json['provider'] ?? '',
         providerLogo: json['providerLogo'],
         type: json['type'] ?? '',
+        typeDetails: json['typeDetails'],
         countries: List<String>.from(json['countries'] ?? []),
         fields: List<String>.from(json['fields'] ?? []),
         level: List<String>.from(json['level'] ?? []),
@@ -159,6 +163,7 @@ class Scholarship extends Equatable {
       'provider': provider,
       'providerLogo': providerLogo,
       'type': type,
+      'typeDetails': typeDetails,
       'countries': countries,
       'fields': fields,
       'level': level,
@@ -294,7 +299,7 @@ class Scholarship extends Equatable {
     String? provider,
     String? providerLogo,
     String? type,
-    List<String>? countries,
+    String? typeDetails,
     List<String>? fields,
     List<String>? level,
     double? amount,
@@ -319,6 +324,7 @@ class Scholarship extends Equatable {
       provider: provider ?? this.provider,
       providerLogo: providerLogo ?? this.providerLogo,
       type: type ?? this.type,
+      typeDetails: typeDetails ?? this.typeDetails,
       countries: countries ?? this.countries,
       fields: fields ?? this.fields,
       level: level ?? this.level,
@@ -347,6 +353,7 @@ class Scholarship extends Equatable {
         provider,
         providerLogo,
         type,
+        typeDetails,
         countries,
         fields,
         level,
