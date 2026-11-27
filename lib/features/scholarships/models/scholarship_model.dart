@@ -46,7 +46,7 @@ class Scholarship extends Equatable {
   final String? currency;
 
   // @HiveField(11)
-  final DateTime deadline;
+  final DateTime? deadline;
 
   // @HiveField(12)
   final DateTime? startDate;
@@ -94,7 +94,7 @@ class Scholarship extends Equatable {
     required this.level,
     this.amount,
     this.currency,
-    required this.deadline,
+    this.deadline,
     this.startDate,
     this.duration,
     required this.link,
@@ -132,7 +132,7 @@ class Scholarship extends Equatable {
         currency: json['currency'],
         deadline: json['deadline'] != null
             ? DateTime.parse(json['deadline'])
-            : DateTime.now(),
+            : null,
         startDate: json['startDate'] != null
             ? DateTime.parse(json['startDate'])
             : null,
@@ -169,7 +169,7 @@ class Scholarship extends Equatable {
       'level': level,
       'amount': amount,
       'currency': currency,
-      'deadline': deadline.toIso8601String(),
+      'deadline': deadline?.toIso8601String(),
       'startDate': startDate?.toIso8601String(),
       'duration': duration,
       'link': link,
@@ -237,13 +237,13 @@ class Scholarship extends Equatable {
     };
   }
 
-  int get daysLeft {
-    final now = DateTime.now();
-    return deadline.difference(now).inDays;
+  int? get daysLeft {
+    if (deadline == null) return null;
+    return deadline!.difference(DateTime.now()).inDays;
   }
 
-  bool get isExpiringSoon => daysLeft <= 7 && daysLeft >= 0;
-  bool get isExpired => daysLeft < 0;
+  bool get isExpiringSoon => daysLeft != null && daysLeft! <= 7 && daysLeft! >= 0;
+  bool get isExpired => daysLeft != null && daysLeft! < 0;
 
   String get typeLabel {
     switch (type) {
