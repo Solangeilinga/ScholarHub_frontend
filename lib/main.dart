@@ -137,7 +137,7 @@ class _ScholarHubAppState extends State<ScholarHubApp> {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (!mounted) return;
                 setState(() => _isPreloaded = true);
-                PreloadService().preloadAll(context);
+                context.read<PreloadService>().preloadAll(context);
               });
               return const _PreloadingScreen();
             }
