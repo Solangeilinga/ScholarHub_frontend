@@ -92,7 +92,6 @@ class _ScholarHubAppState extends State<ScholarHubApp> {
     super.initState();
     _apiClient = ApiClient();
     _initFirebase();
-    _startPreloading();
   }
 
   Future<void> _initFirebase() async {
@@ -102,21 +101,6 @@ class _ScholarHubAppState extends State<ScholarHubApp> {
     } catch (e) {
       debugPrint('Firebase init error: $e');
     }
-  }
-
-  Future<void> _startPreloading() async {
-    // Attendre que le widget soit construit
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted) return;
-
-      // On considère l'app prête dès le premier frame pour laisser le router
-      // afficher la page correspondante (splash, login, home...).
-      // Le préchargement se poursuivra en arrière-plan sans bloquer l'UI.
-      setState(() => _isPreloaded = true);
-
-      // Lancer le préchargement en arrière-plan (on ne bloque pas la vue)
-      await context.read<PreloadService>().preloadAll(context);
-    });
   }
 
   @override
@@ -145,7 +129,20 @@ class _ScholarHubAppState extends State<ScholarHubApp> {
             ),
           ),
         ],
-        child: BlocListener<AuthBloc, AuthState>(
+        child: Builder(
+          builder: (context) {
+            // Ce contexte est placé SOUS MultiRepositoryProvider et MultiBlocProvider :
+            // il peut donc accéder à PreloadService, ScholarshipBloc et NotificationBloc.
+            if (!_isPreloaded) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (!mounted) return;
+                setState(() => _isPreloaded = true);
+                PreloadService().preloadAll(context);
+              });
+              return const _PreloadingScreen();
+            }
+
+            return BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
             // Rafraîchit le router à chaque changement d'état auth
             AppRouter.router.refresh();
@@ -164,14 +161,9 @@ class _ScholarHubAppState extends State<ScholarHubApp> {
             darkTheme: AppTheme.darkTheme,
             themeMode: ThemeMode.system,
             routerConfig: AppRouter.router,
-            builder: (context, child) {
-              // Afficher un écran de chargement si pas préchargé
-              if (!_isPreloaded) {
-                return const _PreloadingScreen();
-              }
-              return child!;
-            },
           ),
+            );
+          },
         ),
       ),
     );
