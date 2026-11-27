@@ -12,7 +12,7 @@ class ScholarshipCard extends StatelessWidget {
   const ScholarshipCard({super.key, required this.scholarship});
 
   String _formatDate(DateTime? date) {
-    if (date == null) return 'Date flexible';
+    if (date == null) return 'Non communiquée';
     return formatDateFr(date);
   }
 
