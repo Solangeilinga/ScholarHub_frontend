@@ -436,7 +436,14 @@ class _ScholarshipDetailScreenState extends State<ScholarshipDetailScreen>
                       uri.userInfo.isNotEmpty ||
                       uri.host.toLowerCase() == 'localhost' ||
                       uri.host.toLowerCase().endsWith('.local') ||
-                      RegExp(r'^\d{1,3}(\.\d{1,3}){3}
+                      (uri.host.split('.').length == 4 &&
+                          uri.host.split('.').every((part) => int.tryParse(part) != null))) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Le lien de candidature est invalide ou non sécurisé.')),
+                    );
+                    return;
+                  }
+                  try {
                     await launchUrl(uri, mode: LaunchMode.externalApplication);
                   } catch (_) {
                     try {
