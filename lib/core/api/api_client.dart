@@ -89,6 +89,7 @@ class ApiClient {
   Future<Response> login(Map<String, dynamic> data) =>
       _dio.post('/auth/login', data: data);
   Future<Response> getMe() => _dio.get('/auth/me');
+  Future<Response> logout() => _dio.post('/auth/logout');
   Future<Response> forgotPassword(String email) =>
       _dio.post('/auth/forgot-password', data: {'email': email});
   Future<Response> resetPassword(String token, String password) =>
