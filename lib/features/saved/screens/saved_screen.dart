@@ -336,7 +336,7 @@ class _SavedScholarshipCardState extends State<_SavedScholarshipCard>
                           const SizedBox(width: 12),
                           _InfoTag(
                             icon: Icons.calendar_today_outlined,
-                            label: formatDateFr(s.deadline),
+                            label: s.deadline != null ? formatDateFr(s.deadline!) : 'Non communiquée',
                             color: s.isExpiringSoon ? AppTheme.accent : AppTheme.textSecondary,
                           ),
                         ],
