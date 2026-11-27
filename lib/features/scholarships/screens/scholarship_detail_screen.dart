@@ -234,7 +234,7 @@ class _ScholarshipDetailScreenState extends State<ScholarshipDetailScreen>
                               const SizedBox(width: 12),
                               _InfoBadge(
                                   Icons.calendar_today_outlined,
-                                  formatDateFr(s.deadline),
+                                  (s.deadline != null ? formatDateFr(s.deadline!) : 'Non communiquée'),
                                   AppTheme.accent),
                             ],
                           ),
