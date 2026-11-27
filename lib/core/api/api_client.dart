@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiClient {
   static const String baseUrl =
       'https://scholarhub-backend-n8de.onrender.com/api';
+  static const String _tokenKey = 'auth_token';
+  static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
   late final Dio _dio;
 
@@ -20,32 +22,24 @@ class ApiClient {
       ),
     );
 
-    _dio.interceptors.addAll([
+    // Ne jamais journaliser les en-têtes, mots de passe, jetons ou réponses API.
+    _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          final prefs = await SharedPreferences.getInstance();
-          final token = prefs.getString('auth_token');
-          if (token != null) {
+          final token = await getToken();
+          if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
           }
           handler.next(options);
         },
         onError: (error, handler) async {
           if (error.response?.statusCode == 401) {
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.remove('auth_token');
+            await deleteToken();
           }
           handler.next(error);
         },
       ),
-      PrettyDioLogger(
-        requestHeader: true,
-        requestBody: true,
-        responseBody: true,
-        error: true,
-        compact: false,
-      ),
-    ]);
+    );
 
     _wakeUpServer();
   }
@@ -62,19 +56,31 @@ class ApiClient {
     } catch (_) {}
   }
 
+  // Migration transparente des anciennes sessions SharedPreferences
+  // vers le stockage sécurisé du système (Keychain iOS / Keystore Android).
   Future<void> saveToken(String token) async {
+    await _secureStorage.write(key: _tokenKey, value: token);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('auth_token', token);
+    await prefs.remove(_tokenKey);
   }
 
   Future<void> deleteToken() async {
+    await _secureStorage.delete(key: _tokenKey);
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_token');
+    await prefs.remove(_tokenKey);
   }
 
   Future<String?> getToken() async {
+    final secureToken = await _secureStorage.read(key: _tokenKey);
+    if (secureToken != null && secureToken.isNotEmpty) return secureToken;
+
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('auth_token');
+    final legacyToken = prefs.getString(_tokenKey);
+    if (legacyToken == null || legacyToken.isEmpty) return null;
+
+    await _secureStorage.write(key: _tokenKey, value: legacyToken);
+    await prefs.remove(_tokenKey);
+    return legacyToken;
   }
 
   // Auth
@@ -120,11 +126,8 @@ class ApiClient {
   Future<Response> markAllNotificationsRead() =>
       _dio.patch('/notifications/read-all');
   Future<Response> getUnreadCount() => _dio.get('/notifications/unread-count');
-  
-  // NOUVELLES MÉTHODES DE SUPPRESSION
   Future<Response> deleteNotification(String id) =>
       _dio.delete('/notifications/$id');
-      
   Future<Response> deleteAllNotifications() =>
       _dio.delete('/notifications/all');
 
