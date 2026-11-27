@@ -73,66 +73,17 @@
   <div id="ios-install-banner" class="install-banner">
     <span class="icon">📲</span>
     <span class="text">Installe ScholarHub pour recevoir tes alertes de bourses : appuie sur <strong>Partager</strong> puis <strong>« Sur l'écran d'accueil »</strong>.</span>
-    <button class="close-btn" onclick="document.getElementById('ios-install-banner').classList.remove('visible'); localStorage.setItem('sh_ios_banner_dismissed', '1');">OK</button>
+    <button class="close-btn" id="ios-install-close">OK</button>
   </div>
 
   <div id="android-install-banner" class="install-banner">
     <span class="icon">📲</span>
     <span class="text">Installe ScholarHub pour ne rater aucune alerte de bourse.</span>
     <button class="install-btn" id="android-install-btn">Installer</button>
-    <button class="close-btn" onclick="document.getElementById('android-install-banner').classList.remove('visible'); localStorage.setItem('sh_android_banner_dismissed', '1');">✕</button>
+    <button class="close-btn" id="android-install-close">✕</button>
   </div>
 
-  <script>
-    (function () {
-      var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-      var isStandalone = window.navigator.standalone === true ||
-        window.matchMedia('(display-mode: standalone)').matches;
-      var deferredPrompt = null;
-
-      // Capture l'événement d'installation Android dès que possible (il ne
-      // se déclenche qu'une fois et tôt) — on empêche le mini-bandeau auto
-      // de Chrome, mais on n'affiche PAS encore notre bannière ici : on
-      // attend que Flutter nous dise que l'utilisateur vient de se connecter.
-      window.addEventListener('beforeinstallprompt', function (e) {
-        e.preventDefault();
-        deferredPrompt = e;
-      });
-
-      window.addEventListener('appinstalled', function () {
-        localStorage.setItem('sh_android_banner_dismissed', '1');
-        var el = document.getElementById('android-install-banner');
-        if (el) el.classList.remove('visible');
-      });
-
-      document.getElementById('android-install-btn').addEventListener('click', function () {
-        var el = document.getElementById('android-install-banner');
-        if (el) el.classList.remove('visible');
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(function () {
-          deferredPrompt = null;
-        });
-      });
-
-      // Fonction appelée depuis Dart (PwaInstallService) juste après une
-      // connexion réussie. Ne fait rien si déjà installée ou déjà fermée.
-      window.showScholarHubInstallBanner = function () {
-        if (isStandalone) return;
-
-        if (isIOS) {
-          if (localStorage.getItem('sh_ios_banner_dismissed') === '1') return;
-          var iosEl = document.getElementById('ios-install-banner');
-          if (iosEl) iosEl.classList.add('visible');
-        } else if (deferredPrompt) {
-          if (localStorage.getItem('sh_android_banner_dismissed') === '1') return;
-          var androidEl = document.getElementById('android-install-banner');
-          if (androidEl) androidEl.classList.add('visible');
-        }
-      };
-    })();
-  </script>
-
+  <script src="install-banner.js" defer></script>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader
