@@ -99,10 +99,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onLogout(AuthLogoutEvent event, Emitter<AuthState> emit) async {
-    // Supprimer le token FCM du backend avant déconnexion
+    // Retirer d'abord le token FCM, puis révoquer la session côté serveur.
     await FirebaseService.onLogout(apiClient);
-    await apiClient.deleteToken();
-    emit(AuthUnauthenticatedState());
+    try {
+      await apiClient.logout();
+    } catch (_) {
+      // La déconnexion locale doit rester possible même hors connexion.
+    } finally {
+      await apiClient.deleteToken();
+      emit(AuthUnauthenticatedState());
+    }
   }
 
   String _parseError(dynamic e) {
