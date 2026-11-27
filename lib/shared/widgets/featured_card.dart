@@ -122,7 +122,7 @@ class FeaturedCard extends StatelessWidget {
                             color: AppTheme.textSecondary,
                             fontWeight: FontWeight.w500)),
                     Text(
-                      formatDateFr(scholarship.deadline),
+                      scholarship.deadline != null ? formatDateFr(scholarship.deadline!) : 'Non communiquée',
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                           color: AppTheme.textPrimary,
                           fontWeight: FontWeight.w700),
