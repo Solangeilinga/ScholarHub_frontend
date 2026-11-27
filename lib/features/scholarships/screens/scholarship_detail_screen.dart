@@ -428,8 +428,182 @@ class _ScholarshipDetailScreenState extends State<ScholarshipDetailScreen>
                 onPressed: () async {
                   final rawLink = s.link.trim();
                   final urlString =
-                      rawLink.startsWith('http') ? rawLink : 'https://$rawLink';
-                  final uri = Uri.parse(urlString);
+                      rawLink.contains('://') ? rawLink : 'https://$rawLink';
+                  final uri = Uri.tryParse(urlString);
+                  if (uri == null ||
+                      !['http', 'https'].contains(uri.scheme.toLowerCase()) ||
+                      uri.host.isEmpty ||
+                      uri.userInfo.isNotEmpty ||
+                      uri.host.toLowerCase() == 'localhost' ||
+                      uri.host.toLowerCase().endsWith('.local') ||
+                      RegExp(r'^\d{1,3}(\.\d{1,3}){3}
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } catch (_) {
+                    try {
+                      await launchUrl(uri, mode: LaunchMode.platformDefault);
+                    } catch (_) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Lien : $urlString'),
+                            action: SnackBarAction(
+                              label: 'Copier',
+                              onPressed: () {
+                                Clipboard.setData(
+                                    ClipboardData(text: urlString));
+                              },
+                            ),
+                            duration: const Duration(seconds: 5),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                        );
+                      }
+                    }
+                  }
+                },
+                icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                label: const Text('Postuler'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CountryChip extends StatelessWidget {
+  final String code;
+  const _CountryChip(this.code);
+
+  @override
+  Widget build(BuildContext context) {
+    final country = countryByCode[code];
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppTheme.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(country?.flag ?? '🌍',
+              style: Theme.of(context).textTheme.bodyMedium),
+          const SizedBox(width: 6),
+          Text(country?.name ?? code,
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: AppTheme.primary, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoBadge extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  const _InfoBadge(this.icon, this.label, this.color);
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+                child: Text(label,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyMedium!
+                        .copyWith(color: color, fontWeight: FontWeight.w600))),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _Chip(this.label, this.color);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Text(label,
+          style: Theme.of(context)
+              .textTheme
+              .bodySmall!
+              .copyWith(color: color, fontWeight: FontWeight.w600)),
+    );
+  }
+}
+
+class _Section extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final Widget child;
+  const _Section(
+      {required this.title, required this.icon, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: AppTheme.primary),
+              const SizedBox(width: 8),
+              Text(title,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium!
+                      .copyWith(color: AppTheme.textPrimary)),
+            ],
+          ),
+          const SizedBox(height: 4),
+          const Divider(color: AppTheme.border),
+          const SizedBox(height: 8),
+          child,
+        ],
+      ),
+    );
+  }
+}
+).hasMatch(uri.host)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Le lien de candidature est invalide ou non sécurisé.')),
+                    );
+                    return;
+                  }
                   try {
                     await launchUrl(uri, mode: LaunchMode.externalApplication);
                   } catch (_) {
