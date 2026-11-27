@@ -26,6 +26,14 @@ jobs:
       - name: Build ScholarHub Web
         run: flutter build web --release
 
+      - name: Verify PWA assets
+        run: |
+          test -s build/web/manifest.json
+          test -s build/web/icons/Icon-192.png
+          test -s build/web/icons/Icon-512.png
+          test -s build/web/firebase-messaging-sw.js
+          grep -q '"display": "standalone"' build/web/manifest.json
+
       - name: Upload PWA build
         uses: actions/upload-artifact@v4
         with:
